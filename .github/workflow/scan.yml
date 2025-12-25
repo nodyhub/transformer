@@ -1,0 +1,14 @@
+name: Security Scan
+on: [pull_request]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run security scan
+        uses: nodyhub/transformer@v1
+        with:
+          scan-file: '.github/transformer/scan.yml'
+          fail-on-error: 'true'

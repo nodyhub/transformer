@@ -1,0 +1,31 @@
+# Basic echo
+- name: Hello World
+  using: builtin/echo
+  with:
+    message: "Hello World"
+
+# Shell command with output capture
+- id: date
+  name: Get date
+  using: builtin/shell
+  with:
+    command: date
+
+# Use variables
+- name: Print with variables
+  using: builtin/echo
+  with:
+    message: "Date: ${{ outputs.date }}, Home: ${{ env.HOME }}, Arg: ${{ args.0 }}"
+
+# Output redirection
+- name: Redirect to file
+  using: builtin/shell
+  with:
+    command: echo "logged"
+    stdout: /tmp/transformer.log
+
+- name: Discard output
+  using: builtin/shell
+  with:
+    command: echo "suppressed"
+    stdout: discard

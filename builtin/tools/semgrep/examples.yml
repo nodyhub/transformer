@@ -1,0 +1,40 @@
+# Security audit
+- name: Semgrep security audit
+  using: builtin/tools/semgrep
+  with:
+    target: src/
+    config: p/security-audit
+    format: sarif
+    output: semgrep.sarif
+    severity: ERROR
+
+# CI/CD scan
+- name: Semgrep CI scan
+  using: builtin/tools/semgrep
+  with:
+    config: p/ci
+    format: json
+    output: semgrep-ci.json
+    metrics: off
+
+# Custom rules with exclusions
+- name: Custom Semgrep rules
+  using: builtin/tools/semgrep
+  with:
+    target: .
+    config: /path/to/custom-rules.yml
+    format: sarif
+    output: semgrep-custom.sarif
+    exclude:
+      - "**/test/**"
+      - "**/vendor/**"
+      - "**/node_modules/**"
+
+# Multiple rulesets
+- name: Comprehensive scan
+  using: builtin/tools/semgrep
+  with:
+    config: p/security-audit,p/owasp-top-ten
+    format: json
+    output: semgrep-full.json
+    max-memory: 8000

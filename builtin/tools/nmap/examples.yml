@@ -1,0 +1,74 @@
+# Basic port scan
+- name: Scan common ports
+  using: builtin/tools/nmap
+  with:
+    target: example.com
+    ports: 22,80,443,8080
+    output: nmap-basic
+    format: json
+
+# Network range scan
+- name: Scan network subnet
+  using: builtin/tools/nmap
+  with:
+    target: 192.168.1.0/24
+    ports: 1-1000
+    timing: 4
+    output: nmap-network
+    format: all
+
+# Service detection
+- name: Detect services and versions
+  using: builtin/tools/nmap
+  with:
+    target: example.com
+    version-detection: true
+    output: nmap-services
+    format: json
+
+# OS detection
+- name: Detect operating system
+  using: builtin/tools/nmap
+  with:
+    target: 192.168.1.1
+    os-detection: true
+    timing: 3
+    output: nmap-os
+
+# Aggressive scan
+- name: Aggressive network scan
+  using: builtin/tools/nmap
+  with:
+    target: example.com
+    aggressive: true
+    output: nmap-aggressive
+    format: all
+
+# Vulnerability scanning
+- name: Scan for vulnerabilities
+  using: builtin/tools/nmap
+  with:
+    target: example.com
+    script: vuln
+    version-detection: true
+    output: nmap-vuln
+    format: json
+
+# Custom NSE scripts
+- name: Custom script scan
+  using: builtin/tools/nmap
+  with:
+    target: example.com
+    script: http-enum,http-headers,ssl-cert
+    ports: 80,443
+    output: nmap-custom
+
+# Stealth scan
+- name: Stealth SYN scan
+  using: builtin/tools/nmap
+  with:
+    target: example.com
+    scan-type: -sS
+    timing: 2
+    ports: 1-65535
+    output: nmap-stealth

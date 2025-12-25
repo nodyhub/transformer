@@ -1,0 +1,87 @@
+# Create database
+- name: Create CodeQL database
+  using: builtin/tools/codeql
+  with:
+    action: database-create
+    database: /tmp/codeql-db
+    language: go
+    source-root: /workspace
+
+# Analyze database
+- name: Analyze with CodeQL
+  using: builtin/tools/codeql
+  with:
+    action: database-analyze
+    database: /tmp/codeql-db
+    query: go-security-extended.qls
+    format: sarif-latest
+    output: codeql.sarif
+
+# Complete workflow (Go)
+- name: Create CodeQL database
+  id: create-db
+  using: builtin/tools/codeql
+  with:
+    action: database-create
+    database: /tmp/codeql-go-db
+    language: go
+    source-root: .
+
+- name: Run security queries
+  using: builtin/tools/codeql
+  with:
+    action: database-analyze
+    database: /tmp/codeql-go-db
+    query: security-extended
+    format: sarif-latest
+    output: codeql-security.sarif
+    threads: 4
+    ram: 4096
+
+# Python analysis
+- name: Analyze Python code
+  using: builtin/tools/codeql
+  with:
+    action: database-create
+    database: /tmp/python-db
+    language: python
+    source-root: /workspace
+
+- name: Run Python queries
+  using: builtin/tools/codeql
+  with:
+    action: database-analyze
+    database: /tmp/python-db
+    query: python-security-and-quality.qls
+    format: sarif-latest
+    output: python-results.sarif
+
+# Java analysis with build command
+- name: Create Java database
+  using: builtin/tools/codeql
+  with:
+    action: database-create
+    database: /tmp/java-db
+    language: java
+    source-root: .
+    additional-args:
+      - --command=mvn clean compile
+
+- name: Analyze Java code
+  using: builtin/tools/codeql
+  with:
+    action: database-analyze
+    database: /tmp/java-db
+    query: java-security-extended.qls
+    format: sarif-latest
+    output: java-results.sarif
+
+# Custom query
+- name: Run custom query
+  using: builtin/tools/codeql
+  with:
+    action: database-analyze
+    database: /tmp/codeql-db
+    query: /path/to/custom-query.ql
+    format: csv
+    output: custom-results.csv

@@ -1,0 +1,38 @@
+# Scan web application
+- name: Scan web application
+  using: builtin/tools/nuclei
+  with:
+    target: https://example.com
+    templates: /root/nuclei-templates/
+    severity: critical,high
+    format: json
+    output: nuclei-web.json
+
+# Scan multiple targets
+- name: Scan multiple hosts
+  using: builtin/tools/nuclei
+  with:
+    target: targets.txt
+    tags: cve,exposure
+    silent: true
+    output: nuclei-findings.json
+
+# CVE detection
+- name: CVE scanning
+  using: builtin/tools/nuclei
+  with:
+    target: https://api.example.com
+    tags: cve
+    severity: high,critical
+    format: sarif
+    output: nuclei-cve.sarif
+    stats: true
+
+# Custom workflows
+- name: Custom vulnerability workflow
+  using: builtin/tools/nuclei
+  with:
+    target: https://example.com
+    workflows: /custom/workflows/
+    output: nuclei-workflow.json
+    update-templates: true

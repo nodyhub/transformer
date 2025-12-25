@@ -1,0 +1,81 @@
+name: 'Transformer Security Scanner'
+description: 'Run security scans using transformer with custom scan configuration'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  scan-file:
+    description: 'Path to the scan configuration file (YAML)'
+    required: false
+    default: '.github/transformer/scan.yml'
+  
+  working-directory:
+    description: 'Working directory for the scan'
+    required: false
+    default: '.'
+  
+  output-file:
+    description: 'Path to save the scan results (SARIF format)'
+    required: false
+    default: 'security-report.sarif'
+  
+  transformer-version:
+    description: 'Transformer Docker image version to use'
+    required: false
+    default: 'latest'
+  
+  fail-on-error:
+    description: 'Fail the action if scan finds issues'
+    required: false
+    default: 'false'
+
+outputs:
+  sarif-report:
+    description: 'Path to the generated SARIF report'
+    value: ${{ steps.scan.outputs.report }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate scan file
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.scan-file }}" ]; then
+          echo "Error: Scan file '${{ inputs.scan-file }}' not found"
+          exit 1
+        fi
+        echo "Using scan configuration: ${{ inputs.scan-file }}"
+
+    - name: Run transformer scan
+      id: scan
+      shell: bash
+      run: |
+        docker run --rm \
+          -v "${{ github.workspace }}:/workspace" \
+          -w "/workspace/${{ inputs.working-directory }}" \
+          ghcr.io/nodyhub/transformer:${{ inputs.transformer-version }} \
+          transformer run "${{ inputs.scan-file }}"
+        
+        echo "report=${{ inputs.output-file }}" >> $GITHUB_OUTPUT
+
+    - name: Check scan results
+      shell: bash
+      if: inputs.fail-on-error == 'true'
+      run: |
+        if [ -f "${{ inputs.output-file }}" ]; then
+          # Check if SARIF report has any results
+          RESULT_COUNT=$(jq '[.runs[].results | length] | add // 0' "${{ inputs.output-file }}")
+          if [ "$RESULT_COUNT" -gt 0 ]; then
+            echo "::error::Security scan found $RESULT_COUNT issue(s)"
+            exit 1
+          fi
+        fi
+
+    - name: Upload scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-scan-results
+        path: ${{ inputs.output-file }}
+        if-no-files-found: warn

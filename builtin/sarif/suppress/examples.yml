@@ -1,0 +1,71 @@
+# SARIF Suppress - Filter out findings from SARIF reports
+#
+# Use this to remove false positives, low severity issues, or specific paths.
+# For a complete workflow example, see: /builtin/sarif/example.yml
+
+# Suppress by path patterns
+- name: Suppress vendor and test files
+  uses: builtin/sarif/suppress
+  with:
+    input: ${{ outputs.sarif_report }}
+    path_patterns:
+      - "vendor/**"
+      - "**/node_modules/**"
+      - "test/**"
+      - "**/*.test.*"
+      - "**/*_test.go"
+
+# Suppress by severity level
+- name: Suppress low severity findings
+  uses: builtin/sarif/suppress
+  with:
+    input: ${{ outputs.sarif_report }}
+    severities:
+      - note
+      - warning
+
+# Suppress by rule ID (exact match)
+- name: Suppress specific vulnerabilities
+  uses: builtin/sarif/suppress
+  with:
+    input: ${{ outputs.sarif_report }}
+    rule_ids:
+      - CVE-2024-1234
+      - CVE-2024-5678
+      - GHSA-xxxx-yyyy-zzzz
+
+# Suppress by rule patterns (regex)
+- name: Suppress CVEs from 2023
+  uses: builtin/sarif/suppress
+  with:
+    input: ${{ outputs.sarif_report }}
+    rule_patterns:
+      - "CVE-2023-.*"
+
+# Suppress by tool name
+- name: Suppress specific tool findings
+  uses: builtin/sarif/suppress
+  with:
+    input: ${{ outputs.sarif_report }}
+    tools:
+      - nmap
+      - nuclei
+
+# Combine multiple suppression criteria
+- name: Comprehensive suppression
+  uses: builtin/sarif/suppress
+  with:
+    input: ${{ outputs.sarif_report }}
+    path_patterns:
+      - "vendor/**"
+      - "**/node_modules/**"
+      - "third_party/**"
+    severities:
+      - note
+    rule_ids:
+      - CVE-2024-1234
+      - GHSA-abcd-efgh-ijkl
+    rule_patterns:
+      - "CVE-202[0-2]-.*"
+    tools:
+      - nmap

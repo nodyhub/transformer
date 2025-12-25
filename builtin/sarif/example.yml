@@ -1,0 +1,163 @@
+# Example: Security Scanning with SARIF Conversion and Merging
+# This example demonstrates converting tool outputs to SARIF format and merging them
+
+steps:
+  # Run Trivy vulnerability scan (JSON output)
+  - id: trivy_scan
+    name: Trivy Vulnerability Scan
+    uses: builtin/tools/trivy
+    with:
+      type: image
+      target: nginx:latest
+      format: json
+
+  # Convert Trivy output to SARIF
+  - id: trivy_sarif
+    name: Convert Trivy to SARIF
+    uses: builtin/sarif/convert
+    with:
+      tool: "trivy"
+      input: ${{ outputs.trivy_scan }}
+
+  # Run Semgrep static analysis (JSON output)
+  - id: semgrep_scan
+    name: Semgrep Code Analysis
+    uses: builtin/tools/semgrep
+    with:
+      target: .
+      config: auto
+      format: json
+
+  # Convert Semgrep output to SARIF
+  - id: semgrep_sarif
+    name: Convert Semgrep to SARIF
+    uses: builtin/sarif/convert
+    with:
+      tool: "semgrep"
+      input: ${{ outputs.semgrep_scan }}
+
+  # Run Nuclei security scan (JSON output)
+  - id: nuclei_scan
+    name: Nuclei Security Scan
+    uses: builtin/tools/nuclei
+    with:
+      target: https://example.com
+      format: json
+
+  # Convert Nuclei output to SARIF
+  - id: nuclei_sarif
+    name: Convert Nuclei to SARIF
+    uses: builtin/sarif/convert
+    with:
+      tool: "nuclei"
+      input: ${{ outputs.nuclei_scan }}
+
+  # Run Trufflehog secret scan (JSON output)
+  - id: trufflehog_scan
+    name: Trufflehog Secret Scan
+    uses: builtin/tools/trufflehog
+    with:
+      type: filesystem
+      target: .
+      json: true
+
+  # Convert Trufflehog output to SARIF
+  - id: trufflehog_sarif
+    name: Convert Trufflehog to SARIF
+    uses: builtin/sarif/convert
+    with:
+      tool: "trufflehog"
+      input: ${{ outputs.trufflehog_scan }}
+
+  # Run Nmap network scan (JSON output)
+  - id: nmap_scan
+    name: Nmap Network Scan
+    uses: builtin/tools/nmap
+    with:
+      target: 192.168.1.1
+      version-detection: true
+      format: json
+
+  # Convert Nmap output to SARIF
+  - id: nmap_sarif
+    name: Convert Nmap to SARIF
+    uses: builtin/sarif/convert
+    with:
+      tool: "nmap"
+      input: ${{ outputs.nmap_scan }}
+
+  # Run Gosec Go security scanner
+  - id: gosec_scan
+    name: Gosec Go Security Scan
+    uses: builtin/tools/gosec
+    with:
+      target: ./...
+      format: json
+
+  # Convert Gosec output to SARIF
+  - id: gosec_sarif
+    name: Convert Gosec to SARIF
+    uses: builtin/sarif/convert
+    with:
+      tool: "gosec"
+      input: ${{ outputs.gosec_scan }}
+
+  # Run OSV-Scanner vulnerability scan
+  - id: osv_scan
+    name: OSV Scanner Vulnerability Scan
+    uses: builtin/tools/osv-scanner
+    with:
+      target: package-lock.json
+      format: json
+
+  # Convert OSV output to SARIF
+  - id: osv_sarif
+    name: Convert OSV to SARIF
+    uses: builtin/sarif/convert
+    with:
+      tool: "osv"
+      input: ${{ outputs.osv_scan }}
+
+  # Merge all SARIF reports into one
+  - id: unified_sarif
+    name: Merge SARIF Reports
+    uses: builtin/sarif/merge
+    with:
+      reports:
+        - ${{ outputs.trivy_sarif }}
+        - ${{ outputs.semgrep_sarif }}
+        - ${{ outputs.nuclei_sarif }}
+        - ${{ outputs.trufflehog_sarif }}
+        - ${{ outputs.nmap_sarif }}
+        - ${{ outputs.gosec_sarif }}
+        - ${{ outputs.osv_sarif }}
+
+  # Suppress known false positives and vendor files
+  - id: suppressed_sarif
+    name: Suppress False Positives
+    uses: builtin/sarif/suppress
+    with:
+      input: ${{ outputs.unified_sarif }}
+      # Suppress vendor and test directories
+      path_patterns:
+        - "vendor/**"
+        - "**/node_modules/**"
+        - "test/**"
+        - "**/*.test.*"
+      # Suppress low severity findings
+      severities:
+        - note
+
+  # Save the suppressed SARIF report
+  - id: save_report
+    name: Save Unified Report
+    uses: builtin/file/write
+    with:
+      path: "security-report.sarif"
+      content: ${{ outputs.suppressed_sarif }}
+
+  # Print summary
+  - name: Print Summary
+    uses: builtin/echo
+    with:
+      message: "✓ Security scan complete! Report saved to security-report.sarif"

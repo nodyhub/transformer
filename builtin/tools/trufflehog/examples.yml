@@ -1,0 +1,45 @@
+# Scan Git repository
+- name: Scan repository for secrets
+  using: builtin/tools/trufflehog
+  with:
+    type: git
+    target: https://github.com/user/repo.git
+    json: true
+    only-verified: true
+
+# Scan recent commits
+- name: Scan last 100 commits
+  using: builtin/tools/trufflehog
+  with:
+    type: git
+    target: .
+    json: true
+    since-commit: HEAD~100
+
+# Scan specific branch
+- name: Scan development branch
+  using: builtin/tools/trufflehog
+  with:
+    type: git
+    target: https://github.com/user/repo.git
+    branch: develop
+    json: true
+    only-verified: true
+
+# Scan filesystem
+- name: Scan filesystem for secrets
+  using: builtin/tools/trufflehog
+  with:
+    type: filesystem
+    target: /path/to/code
+    json: true
+    exclude-paths: exclude-patterns.txt
+
+# Scan Docker image
+- name: Scan container for secrets
+  using: builtin/tools/trufflehog
+  with:
+    type: docker
+    target: myapp:latest
+    json: true
+    only-verified: true

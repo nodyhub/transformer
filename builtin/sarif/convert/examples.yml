@@ -1,0 +1,61 @@
+# SARIF Convert - Convert security tool outputs to SARIF format
+#
+# Supported tools: trivy, semgrep, nuclei, trufflehog, nmap, gosec, osv, codeql
+#
+# For a complete workflow example, see: /builtin/sarif/example.yml
+
+# Basic conversion - Trivy
+- name: Convert Trivy to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: trivy
+    input: ${{ outputs.trivy_scan }}  # Trivy JSON output
+
+# Basic conversion - Semgrep
+- name: Convert Semgrep to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: semgrep
+    input: ${{ outputs.semgrep_scan }}  # Semgrep JSON output
+
+# Basic conversion - Nuclei
+- name: Convert Nuclei to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: nuclei
+    input: ${{ outputs.nuclei_scan }}  # Nuclei JSONL output
+
+# Basic conversion - Trufflehog
+- name: Convert Trufflehog to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: trufflehog
+    input: ${{ outputs.trufflehog_scan }}  # Trufflehog JSONL output
+
+# Basic conversion - Nmap
+- name: Convert Nmap to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: nmap
+    input: ${{ outputs.nmap_scan }}  # Nmap JSON output
+
+# Basic conversion - Gosec
+- name: Convert Gosec to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: gosec
+    input: ${{ outputs.gosec_scan }}  # Gosec JSON output
+
+# Basic conversion - OSV-Scanner
+- name: Convert OSV to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: osv
+    input: ${{ outputs.osv_scan }}  # OSV JSON output
+
+# Basic conversion - CodeQL (pass-through or JSON)
+- name: Convert CodeQL to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: codeql
+    input: ${{ outputs.codeql_analysis }}  # CodeQL SARIF/JSON output

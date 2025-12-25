@@ -1,0 +1,26 @@
+# SARIF Merge - Combine multiple SARIF reports into one
+#
+# Use this to unify results from multiple security tools into a single report.
+# For a complete workflow example, see: /builtin/sarif/example.yml
+
+# Merge two reports
+- name: Merge two SARIF reports
+  uses: builtin/sarif/merge
+  with:
+    reports:
+      - ${{ outputs.trivy_sarif }}
+      - ${{ outputs.semgrep_sarif }}
+
+# Merge multiple reports
+- name: Merge all security tool reports
+  uses: builtin/sarif/merge
+  with:
+    reports:
+      - ${{ outputs.trivy_sarif }}
+      - ${{ outputs.semgrep_sarif }}
+      - ${{ outputs.nuclei_sarif }}
+      - ${{ outputs.trufflehog_sarif }}
+      - ${{ outputs.nmap_sarif }}
+      - ${{ outputs.gosec_sarif }}
+      - ${{ outputs.osv_sarif }}
+      - ${{ outputs.codeql_sarif }}
