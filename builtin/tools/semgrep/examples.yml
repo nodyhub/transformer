@@ -1,6 +1,6 @@
 # Security audit
 - name: Semgrep security audit
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     target: src/
     config: p/security-audit
@@ -10,7 +10,7 @@
 
 # CI/CD scan
 - name: Semgrep CI scan
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     config: p/ci
     format: json
@@ -19,7 +19,7 @@
 
 # Custom rules with exclusions
 - name: Custom Semgrep rules
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     target: .
     config: /path/to/custom-rules.yml
@@ -32,7 +32,7 @@
 
 # Multiple rulesets
 - name: Comprehensive scan
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     config: p/security-audit,p/owasp-top-ten
     format: json

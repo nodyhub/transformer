@@ -10,7 +10,7 @@ Write or append content to a file.
 
 ```yaml
 - id: write_report
-  using: builtin/file/write
+  uses: builtin/file/write
   with:
     path: "report.sarif"
     content: ${{ outputs.merged_sarif }}
@@ -37,7 +37,7 @@ Write or append content to a file.
 ### Write SARIF report
 ```yaml
 - id: save_report
-  using: builtin/file/write
+  uses: builtin/file/write
   with:
     path: "security-report.sarif"
     content: ${{ outputs.merged_sarif }}
@@ -46,7 +46,7 @@ Write or append content to a file.
 ### Append to log file
 ```yaml
 - id: append_log
-  using: builtin/file/write
+  uses: builtin/file/write
   with:
     path: "logs/output.log"
     content: "New log entry\n"
@@ -56,7 +56,7 @@ Write or append content to a file.
 ### Write to nested directory
 ```yaml
 - id: save_config
-  using: builtin/file/write
+  uses: builtin/file/write
   with:
     path: "output/reports/config.json"
     content: ${{ outputs.config }}

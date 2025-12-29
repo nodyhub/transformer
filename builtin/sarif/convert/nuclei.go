@@ -8,9 +8,9 @@ import (
 )
 
 // convertNuclei converts Nuclei JSON output to SARIF
-func convertNuclei(input string) (interface{}, error) {
+func convertNuclei(input interface{}) (interface{}, error) {
 	// Nuclei outputs JSONL (one JSON object per line)
-	lines := strings.Split(strings.TrimSpace(input), "\n")
+	lines := strings.Split(strings.TrimSpace(input.(string)), "\n")
 	results := []common.Result{}
 
 	for _, line := range lines {

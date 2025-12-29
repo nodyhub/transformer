@@ -1,99 +1,98 @@
 # Example: Comprehensive Security Scan
 # This scan.yml runs OSV-Scanner, Semgrep, CodeQL, and Gosec, then merges results into a SARIF report.
 
-steps:
-  # Run OSV-Scanner (dependency vulnerabilities)
-  - id: osv_scan
-    name: OSV Dependency Scan
-    uses: builtin/tools/osv-scanner
-    with:
-      target: go.mod
-      format: json
+# Run OSV-Scanner (dependency vulnerabilities)
+- id: osv_scan
+  name: OSV Dependency Scan
+  uses: "builtin/tools/osv-scanner"
+  with:
+    target: go.mod
+    format: json
 
-  # Convert OSV output to SARIF
-  - id: osv_sarif
-    name: Convert OSV to SARIF
-    uses: builtin/sarif/convert
-    with:
-      tool: "osv"
-      input: ${{ outputs.osv_scan }}
+# Convert OSV output to SARIF
+- id: osv_sarif
+  name: Convert OSV to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "osv"
+    input: ${{ outputs.osv_scan }}
 
-  # Run Semgrep (static analysis)
-  - id: semgrep_scan
-    name: Semgrep Static Analysis
-    uses: builtin/tools/semgrep
-    with:
-      target: .
-      config: auto
-      format: json
+# Run Semgrep (static analysis)
+- id: semgrep_scan
+  name: Semgrep Static Analysis
+  uses: builtin/tools/semgrep
+  with:
+    target: .
+    config: auto
+    format: json
 
-  # Convert Semgrep output to SARIF
-  - id: semgrep_sarif
-    name: Convert Semgrep to SARIF
-    uses: builtin/sarif/convert
-    with:
-      tool: "semgrep"
-      input: ${{ outputs.semgrep_scan }}
+# Convert Semgrep output to SARIF
+- id: semgrep_sarif
+  name: Convert Semgrep to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "semgrep"
+    input: ${{ outputs.semgrep_scan }}
 
-  # Run CodeQL (code analysis)
-  - id: codeql_db
-    name: Create CodeQL DB
-    uses: builtin/tools/codeql
-    with:
-      action: database-create
-      database: /tmp/codeql-db
-      language: go
-      source-root: .
+# Run CodeQL (code analysis)
+- id: codeql_db
+  name: Create CodeQL DB
+  uses: builtin/tools/codeql
+  with:
+    action: database-create
+    database: /tmp/codeql-db
+    language: go
+    source-root: .
 
-  - id: codeql_scan
-    name: CodeQL Analysis
-    uses: builtin/tools/codeql
-    with:
-      action: database-analyze
-      database: /tmp/codeql-db
-      query: security-extended
-      format: sarif-latest
-      output: codeql.sarif
+- id: codeql_scan
+  name: CodeQL Analysis
+  uses: builtin/tools/codeql
+  with:
+    action: database-analyze
+    database: /tmp/codeql-db
+    query: security-extended
+    format: sarif-latest
+    output: codeql.sarif
 
-  # Convert CodeQL output to SARIF (pass-through)
-  - id: codeql_sarif
-    name: Convert CodeQL to SARIF
-    uses: builtin/sarif/convert
-    with:
-      tool: "codeql"
-      input: ${{ outputs.codeql_scan }}
+# Convert CodeQL output to SARIF (pass-through)
+- id: codeql_sarif
+  name: Convert CodeQL to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "codeql"
+    input: ${{ outputs.codeql_scan }}
 
-  # Run Gosec (Go security)
-  - id: gosec_scan
-    name: Gosec Security Scan
-    uses: builtin/tools/gosec
-    with:
-      target: ./...
-      format: json
+# Run Gosec (Go security)
+- id: gosec_scan
+  name: Gosec Security Scan
+  uses: builtin/tools/gosec
+  with:
+    target: ./...
+    format: json
 
-  # Convert Gosec output to SARIF
-  - id: gosec_sarif
-    name: Convert Gosec to SARIF
-    uses: builtin/sarif/convert
-    with:
-      tool: "gosec"
-      input: ${{ outputs.gosec_scan }}
+# Convert Gosec output to SARIF
+- id: gosec_sarif
+  name: Convert Gosec to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "gosec"
+    input: ${{ outputs.gosec_scan }}
 
-  # Merge all SARIF reports
-  - id: merged_sarif
-    name: Merge SARIF Reports
-    uses: builtin/sarif/merge
-    with:
-      reports:
-        - ${{ outputs.osv_sarif }}
-        - ${{ outputs.semgrep_sarif }}
-        - ${{ outputs.codeql_sarif }}
-        - ${{ outputs.gosec_sarif }}
+# Merge all SARIF reports
+- id: merged_sarif
+  name: Merge SARIF Reports
+  uses: builtin/sarif/merge
+  with:
+    reports:
+      - ${{ outputs.osv_sarif }}
+      - ${{ outputs.semgrep_sarif }}
+      - ${{ outputs.codeql_sarif }}
+      - ${{ outputs.gosec_sarif }}
 
-  # Save the merged SARIF report
-  - id: save_report
-    name: Save SARIF Report
-    uses: builtin/file/write
-    with:
-      path: security-report.sarif
-      content: ${{ outputs.merged_sarif }}
+# Save the merged SARIF report
+- id: save_report
+  name: Save SARIF Report
+  uses: builtin/file/write
+  with:
+    path: security-report.sarif
+    content: ${{ outputs.merged_sarif }}

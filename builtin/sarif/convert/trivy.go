@@ -8,9 +8,9 @@ import (
 )
 
 // convertTrivy converts Trivy JSON output to SARIF
-func convertTrivy(input string) (interface{}, error) {
+func convertTrivy(input interface{}) (interface{}, error) {
 	var trivyOutput map[string]interface{}
-	if err := json.Unmarshal([]byte(input), &trivyOutput); err != nil {
+	if err := json.Unmarshal([]byte(input.(string)), &trivyOutput); err != nil {
 		return nil, fmt.Errorf("failed to parse Trivy output: %w", err)
 	}
 

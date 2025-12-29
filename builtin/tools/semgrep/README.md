@@ -6,7 +6,7 @@ Semgrep is a fast, open-source static analysis tool for finding bugs and enforci
 
 ```yaml
 - name: Security scan with Semgrep
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     config: p/security-audit
     format: json

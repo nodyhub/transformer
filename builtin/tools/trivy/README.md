@@ -6,7 +6,7 @@ Trivy is a comprehensive and versatile vulnerability scanner for containers and 
 
 ```yaml
 - name: Scan Docker image
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: image
     target: myapp:latest

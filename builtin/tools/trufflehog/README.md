@@ -6,7 +6,7 @@ Trufflehog finds and verifies secrets in code, commit history, and filesystems.
 
 ```yaml
 - name: Scan for secrets
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: git
     target: https://github.com/user/repo.git

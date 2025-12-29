@@ -1,6 +1,6 @@
 # Scan container image
 - name: Scan production image
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: image
     target: myregistry.io/myapp:v1.0.0
@@ -11,7 +11,7 @@
 
 # Scan filesystem
 - name: Scan source code
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: fs
     target: /workspace
@@ -21,7 +21,7 @@
 
 # Scan Git repository
 - name: Scan remote repository
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: repo
     target: https://github.com/user/repo
@@ -30,7 +30,7 @@
 
 # Advanced scan with custom config
 - name: Advanced Trivy scan
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: image
     target: nginx:latest

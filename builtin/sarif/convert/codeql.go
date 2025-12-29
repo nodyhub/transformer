@@ -10,27 +10,30 @@ import (
 
 // convertCodeQL converts CodeQL output to SARIF
 // CodeQL natively outputs SARIF, but can also output JSON or CSV
-func convertCodeQL(input string) (interface{}, error) {
+func convertCodeQL(input interface{}) (interface{}, error) {
+	codeqlOutput, ok := input.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid CodeQL output format: expected a JSON object, got %T", input)
+	}
+
 	// Try to parse as JSON first
-	var jsonData interface{}
-	if err := json.Unmarshal([]byte(input), &jsonData); err != nil {
+	var codeqlJson map[string]interface{}
+	if err := json.Unmarshal([]byte(codeqlOutput["output"].(string)), &codeqlJson); err != nil {
 		return nil, fmt.Errorf("failed to parse CodeQL output: %w", err)
 	}
 
 	// Check if it's already SARIF format (CodeQL's default output)
-	if jsonMap, ok := jsonData.(map[string]interface{}); ok {
-		if version, ok := jsonMap["version"].(string); ok && strings.HasPrefix(version, "2.1.") {
-			if _, ok := jsonMap["runs"]; ok {
-				// Already SARIF 2.1.0, return as-is
-				return jsonData, nil
-			}
+	if version, ok := codeqlJson["version"].(string); ok && strings.HasPrefix(version, "2.1.") {
+		if _, ok := codeqlJson["runs"]; ok {
+			// Already SARIF 2.1.0, return as-is
+			return codeqlJson, nil
 		}
+	}
 
-		// Handle CodeQL's JSON result format (non-SARIF)
-		// This is the format when using --format=json instead of --format=sarif
-		if columns, ok := jsonMap["#select"].(map[string]interface{}); ok {
-			return convertCodeQLJSON(jsonMap, columns)
-		}
+	// Handle CodeQL's JSON result format (non-SARIF)
+	// This is the format when using --format=json instead of --format=sarif
+	if columns, ok := codeqlJson["#select"].(map[string]interface{}); ok {
+		return convertCodeQLJSON(codeqlJson, columns)
 	}
 
 	return nil, fmt.Errorf("unrecognized CodeQL output format")

@@ -3,11 +3,11 @@ set -euo pipefail
 
 echo "Installing OSV-Scanner dependencies..."
 apt-get update
-apt-get install -y --no-install-recommends ca-certificates wget
+apt-get install -y --no-install-recommends ca-certificates wget curl
 rm -rf /var/lib/apt/lists/*
 
 echo "Installing OSV-Scanner..."
-OSV_VERSION="1.9.1"
+OSV_VERSION="2.3.1"
 # Detect architecture
 ARCH=$(uname -m)
 if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then

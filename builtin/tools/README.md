@@ -21,7 +21,7 @@ Scan a container image for vulnerabilities:
 
 ```yaml
 - name: Scan Docker image
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: image
     target: myapp:latest
@@ -34,7 +34,7 @@ Scan filesystem:
 
 ```yaml
 - name: Scan filesystem
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: fs
     target: /path/to/code
@@ -49,7 +49,7 @@ Run security audit:
 
 ```yaml
 - name: Semgrep security scan
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     target: .
     config: p/security-audit
@@ -62,7 +62,7 @@ Custom rules:
 
 ```yaml
 - name: Semgrep custom rules
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     target: src/
     config: /path/to/rules.yml
@@ -79,7 +79,7 @@ Scan web application:
 
 ```yaml
 - name: Nuclei web scan
-  using: builtin/tools/nuclei
+  uses: builtin/tools/nuclei
   with:
     target: https://example.com
     templates: /root/nuclei-templates/
@@ -92,7 +92,7 @@ Multiple targets:
 
 ```yaml
 - name: Scan multiple hosts
-  using: builtin/tools/nuclei
+  uses: builtin/tools/nuclei
   with:
     target: targets.txt
     tags: cve,exposure
@@ -106,7 +106,7 @@ Create database and analyze:
 
 ```yaml
 - name: Create CodeQL database
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-create
     database: /tmp/codeql-db
@@ -114,7 +114,7 @@ Create database and analyze:
     source-root: .
 
 - name: Analyze with CodeQL
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/codeql-db
@@ -127,7 +127,7 @@ Analyze with custom query:
 
 ```yaml
 - name: Run custom CodeQL query
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/codeql-db
@@ -144,7 +144,7 @@ Scan Go code:
 
 ```yaml
 - name: Gosec security scan
-  using: builtin/tools/gosec
+  uses: builtin/tools/gosec
   with:
     target: ./...
     format: sarif
@@ -159,7 +159,7 @@ Scan Git repository:
 
 ```yaml
 - name: Scan for secrets
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: git
     target: https://github.com/user/repo.git
@@ -172,7 +172,7 @@ Scan filesystem:
 
 ```yaml
 - name: Scan filesystem for secrets
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: filesystem
     target: /path/to/code
@@ -185,7 +185,7 @@ Scan dependencies:
 
 ```yaml
 - name: OSV vulnerability scan
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: .
     format: sarif
@@ -198,7 +198,7 @@ Scan specific lockfile:
 
 ```yaml
 - name: Scan package-lock.json
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: package-lock.json
     format: json
@@ -211,7 +211,7 @@ Port scan:
 
 ```yaml
 - name: Nmap port scan
-  using: builtin/tools/nmap
+  uses: builtin/tools/nmap
   with:
     target: 192.168.1.0/24
     ports: 1-1000
@@ -224,7 +224,7 @@ Service detection:
 
 ```yaml
 - name: Service detection scan
-  using: builtin/tools/nmap
+  uses: builtin/tools/nmap
   with:
     target: example.com
     version-detection: true
@@ -238,7 +238,7 @@ Service detection:
 ```yaml
 - name: Trivy container scan
   id: trivy
-  using: builtin/tools/trivy
+  uses: builtin/tools/trivy
   with:
     type: image
     target: myapp:latest
@@ -246,14 +246,14 @@ Service detection:
 
 - name: Convert Trivy to SARIF
   id: trivy-sarif
-  using: builtin/sarif/convert
+  uses: builtin/sarif/convert
   with:
     tool: trivy
     input: ${{ outputs.trivy }}
 
 - name: Semgrep code scan
   id: semgrep
-  using: builtin/tools/semgrep
+  uses: builtin/tools/semgrep
   with:
     target: .
     config: p/security-audit
@@ -262,7 +262,7 @@ Service detection:
 
 - name: Create CodeQL database
   id: codeql-db
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-create
     database: /tmp/codeql-db
@@ -271,7 +271,7 @@ Service detection:
 
 - name: CodeQL analysis
   id: codeql
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/codeql-db
@@ -281,14 +281,14 @@ Service detection:
 
 - name: Secret scanning
   id: secrets
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: filesystem
     target: .
     json: true
 
 - name: Merge SARIF reports
-  using: builtin/sarif/merge
+  uses: builtin/sarif/merge
   with:
     inputs:
       - trivy.sarif

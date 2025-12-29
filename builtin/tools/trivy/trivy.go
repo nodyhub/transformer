@@ -30,67 +30,11 @@ func Trivy(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("expected 'with' to be a map")
 	}
 
-	// Required: target
-	target, ok := withMap["target"].(string)
-	if !ok || target == "" {
-		return nil, fmt.Errorf("'target' field is required")
+	args, err := buildTrivyArgs(withMap)
+	if err != nil {
+		return nil, err
 	}
 
-	// Build command arguments
-	args := []string{"trivy"}
-
-	// Scan type (default: image)
-	scanType := "image"
-	if t, ok := withMap["type"].(string); ok && t != "" {
-		scanType = t
-	}
-	args = append(args, scanType)
-
-	// Format
-	if format, ok := withMap["format"].(string); ok && format != "" {
-		args = append(args, "--format", format)
-	} else {
-		args = append(args, "--format", "json")
-	}
-
-	// Output file
-	if output, ok := withMap["output"].(string); ok && output != "" {
-		args = append(args, "--output", output)
-	}
-
-	// Severity
-	if severity, ok := withMap["severity"].(string); ok && severity != "" {
-		args = append(args, "--severity", severity)
-	}
-
-	// Scanners
-	if scanners, ok := withMap["scanners"].(string); ok && scanners != "" {
-		args = append(args, "--scanners", scanners)
-	}
-
-	// Exit code
-	if exitCode, ok := withMap["exit-code"].(int); ok {
-		args = append(args, "--exit-code", fmt.Sprintf("%d", exitCode))
-	}
-
-	// Ignore unfixed
-	if ignoreUnfixed, ok := withMap["ignore-unfixed"].(bool); ok && ignoreUnfixed {
-		args = append(args, "--ignore-unfixed")
-	}
-
-	// Additional arguments
-	if additionalArgs, ok := withMap["additional-args"].([]interface{}); ok {
-		for _, arg := range additionalArgs {
-			if argStr, ok := arg.(string); ok {
-				args = append(args, argStr)
-			}
-		}
-	}
-
-	// Add target
-	args = append(args, target)
-
-	// Execute command
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 	output, err := cmd.CombinedOutput()
 
@@ -106,10 +50,70 @@ func Trivy(ctx context.Context, with interface{}) (interface{}, error) {
 		result["exit_code"] = 0
 	}
 
-	// If output file was specified, return the path
 	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
 		result["output_file"] = outputPath
 	}
 
 	return result, nil
+}
+
+func buildTrivyArgs(m map[string]interface{}) ([]string, error) {
+	target, ok := m["target"].(string)
+	if !ok || target == "" {
+		return nil, fmt.Errorf("'target' field is required")
+	}
+
+	args := []string{"trivy"}
+
+	// Scan type (default: image)
+	scanType := "image"
+	if t, ok := m["type"].(string); ok && t != "" {
+		scanType = t
+	}
+	args = append(args, scanType)
+
+	// Format
+	if format, ok := m["format"].(string); ok && format != "" {
+		args = append(args, "--format", format)
+	} else {
+		args = append(args, "--format", "json")
+	}
+
+	// Output file
+	if output, ok := m["output"].(string); ok && output != "" {
+		args = append(args, "--output", output)
+	}
+
+	// Severity
+	if severity, ok := m["severity"].(string); ok && severity != "" {
+		args = append(args, "--severity", severity)
+	}
+
+	// Scanners
+	if scanners, ok := m["scanners"].(string); ok && scanners != "" {
+		args = append(args, "--scanners", scanners)
+	}
+
+	// Exit code
+	if exitCode, ok := m["exit-code"].(int); ok {
+		args = append(args, "--exit-code", fmt.Sprintf("%d", exitCode))
+	}
+
+	// Ignore unfixed
+	if ignoreUnfixed, ok := m["ignore-unfixed"].(bool); ok && ignoreUnfixed {
+		args = append(args, "--ignore-unfixed")
+	}
+
+	// Additional arguments
+	if additionalArgs, ok := m["additional-args"].([]interface{}); ok {
+		for _, arg := range additionalArgs {
+			if argStr, ok := arg.(string); ok {
+				args = append(args, argStr)
+			}
+		}
+	}
+
+	// Add target
+	args = append(args, target)
+	return args, nil
 }

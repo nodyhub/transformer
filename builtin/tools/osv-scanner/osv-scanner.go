@@ -29,43 +29,78 @@ func OSVScanner(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("expected 'with' to be a map")
 	}
 
-	// Build command arguments
+	args, err := buildOSVScannerArgs(withMap)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	var stdout, stderr strings.Builder
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
+
+	result := map[string]interface{}{
+		"command": strings.Join(args, " "),
+		"output":  stdout.String(),
+		"stderr":  stderr.String(),
+	}
+
+	if err != nil {
+		result["error"] = err.Error()
+		if cmd.ProcessState != nil {
+			result["exit_code"] = cmd.ProcessState.ExitCode()
+		} else {
+			result["exit_code"] = -1
+		}
+	} else {
+		result["exit_code"] = 0
+	}
+
+	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
+		result["output_file"] = outputPath
+	}
+
+	return result, nil
+}
+
+func buildOSVScannerArgs(m map[string]interface{}) ([]string, error) {
 	args := []string{"osv-scanner"}
 
 	// Format
-	if format, ok := withMap["format"].(string); ok && format != "" {
+	if format, ok := m["format"].(string); ok && format != "" {
 		args = append(args, "--format", format)
 	} else {
 		args = append(args, "--format", "json")
 	}
 
 	// Output file
-	if output, ok := withMap["output"].(string); ok && output != "" {
+	if output, ok := m["output"].(string); ok && output != "" {
 		args = append(args, "--output", output)
 	}
 
 	// Call analysis
-	if callAnalysis, ok := withMap["call-analysis"].(bool); ok && callAnalysis {
+	if callAnalysis, ok := m["call-analysis"].(bool); ok && callAnalysis {
 		args = append(args, "--call-analysis")
 	}
 
 	// Recursive
-	if recursive, ok := withMap["recursive"].(bool); ok && recursive {
+	if recursive, ok := m["recursive"].(bool); ok && recursive {
 		args = append(args, "--recursive")
 	}
 
 	// Skip git
-	if skipGit, ok := withMap["skip-git"].(bool); ok && skipGit {
+	if skipGit, ok := m["skip-git"].(bool); ok && skipGit {
 		args = append(args, "--skip-git")
 	}
 
 	// Experimental offline
-	if offline, ok := withMap["experimental-offline"].(bool); ok && offline {
+	if offline, ok := m["experimental-offline"].(bool); ok && offline {
 		args = append(args, "--experimental-offline")
 	}
 
 	// Additional arguments
-	if additionalArgs, ok := withMap["additional-args"].([]interface{}); ok {
+	if additionalArgs, ok := m["additional-args"].([]interface{}); ok {
 		for _, arg := range additionalArgs {
 			if argStr, ok := arg.(string); ok {
 				args = append(args, argStr)
@@ -74,8 +109,7 @@ func OSVScanner(ctx context.Context, with interface{}) (interface{}, error) {
 	}
 
 	// Target (required) - can be a directory, lockfile, or SBOM
-	if target, ok := withMap["target"].(string); ok && target != "" {
-		// Check if it's a lockfile or directory scan
+	if target, ok := m["target"].(string); ok && target != "" {
 		if strings.Contains(target, "package-lock.json") ||
 			strings.Contains(target, "go.mod") ||
 			strings.Contains(target, "requirements.txt") ||
@@ -88,26 +122,5 @@ func OSVScanner(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("'target' field is required")
 	}
 
-	// Execute command
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
-	output, err := cmd.CombinedOutput()
-
-	result := map[string]interface{}{
-		"command": strings.Join(args, " "),
-		"output":  string(output),
-	}
-
-	if err != nil {
-		result["error"] = err.Error()
-		result["exit_code"] = cmd.ProcessState.ExitCode()
-	} else {
-		result["exit_code"] = 0
-	}
-
-	// If output file was specified, return the path
-	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
-		result["output_file"] = outputPath
-	}
-
-	return result, nil
+	return args, nil
 }

@@ -6,7 +6,7 @@ Nmap is a network exploration tool and security/port scanner.
 
 ```yaml
 - name: Port scan
-  using: builtin/tools/nmap
+  uses: builtin/tools/nmap
   with:
     target: 192.168.1.1
     ports: 1-1000

@@ -9,9 +9,9 @@ import (
 )
 
 // convertTrufflehog converts Trufflehog JSON output to SARIF
-func convertTrufflehog(input string) (interface{}, error) {
+func convertTrufflehog(input interface{}) (interface{}, error) {
 	// Trufflehog outputs JSONL (one JSON object per line)
-	lines := strings.Split(strings.TrimSpace(input), "\n")
+	lines := strings.Split(strings.TrimSpace(input.(string)), "\n")
 	results := []common.Result{}
 
 	for _, line := range lines {

@@ -6,7 +6,7 @@ Filter out findings from a SARIF report based on suppression rules.
 
 ```yaml
 - name: Suppress false positives
-  using: builtin/sarif/suppress
+  uses: builtin/sarif/suppress
   with:
     input: ${{ outputs.merged_sarif }}
     path_patterns:

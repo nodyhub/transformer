@@ -496,3 +496,90 @@ func TestSubstituteInputs(t *testing.T) {
 		})
 	}
 }
+
+// Test parseInput
+func TestParseInput(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    interface{}
+		expected Steps
+		hasError bool
+	}{
+		{
+			name:  "string YAML input",
+			input: "- uses: builtin/shell\n  with:\n    command: echo hello",
+			expected: Steps{
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+			},
+			hasError: false,
+		},
+		{
+			name:  "string JSON input",
+			input: `[{"uses": "builtin/shell", "with": {"command": "echo hello"}}]`,
+			expected: Steps{
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+			},
+			hasError: false,
+		},
+		{
+			name:  "single Step input",
+			input: Step{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+			expected: Steps{
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+			},
+			hasError: false,
+		},
+		{
+			name: "[]Step input",
+			input: []Step{
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo world"}},
+			},
+			expected: Steps{
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo world"}},
+			},
+			hasError: false,
+		},
+		{
+			name: "Steps input",
+			input: Steps{
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+			},
+			expected: Steps{
+				{Uses: "builtin/shell", With: map[string]interface{}{"command": "echo hello"}},
+			},
+			hasError: false,
+		},
+		{
+			name:     "unsupported type",
+			input:    123,
+			expected: nil,
+			hasError: true,
+		},
+		{
+			name:     "invalid YAML string",
+			input:    "invalid: yaml: content: [unclosed",
+			expected: nil,
+			hasError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parseInput(tt.input)
+			if tt.hasError {
+				if err == nil {
+					t.Errorf("expected error, but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+				if diff := cmp.Diff(tt.expected, result); diff != "" {
+					t.Errorf("mismatch (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}

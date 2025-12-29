@@ -7,7 +7,7 @@ apt-get install -y --no-install-recommends ca-certificates wget tar
 rm -rf /var/lib/apt/lists/*
 
 echo "Installing Gosec..."
-GOSEC_VERSION="2.18.2"
+GOSEC_VERSION="2.22.11"
 # Detect architecture
 ARCH=$(uname -m)
 if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then

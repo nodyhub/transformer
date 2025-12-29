@@ -6,7 +6,7 @@ OSV-Scanner finds existing vulnerabilities affecting your project's dependencies
 
 ```yaml
 - name: Scan dependencies
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: .
     format: sarif

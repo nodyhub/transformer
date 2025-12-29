@@ -50,28 +50,25 @@ func extractToolName(withMap map[string]interface{}) (string, error) {
 	return tool, nil
 }
 
-func extractInput(withMap map[string]interface{}) (string, error) {
+func extractInput(withMap map[string]interface{}) (interface{}, error) {
 	inputRaw, ok := withMap["input"]
 	if !ok {
 		return "", fmt.Errorf("'input' field is required")
 	}
 
-	switch v := inputRaw.(type) {
-	case string:
-		return v, nil
-	case []byte:
-		return string(v), nil
-	default:
-		return fmt.Sprintf("%v", v), nil
-	}
+	return inputRaw, nil
 }
 
-func checkIfAlreadySARIF(input string) (interface{}, bool) {
-	var jsonData interface{}
-	if err := json.Unmarshal([]byte(input), &jsonData); err != nil {
+func checkIfAlreadySARIF(input interface{}) (interface{}, bool) {
+	inputStr, ok := input.(string)
+	if !ok {
 		return nil, false
 	}
 
+	var jsonData interface{}
+	if err := json.Unmarshal([]byte(inputStr), &jsonData); err != nil {
+		return nil, false
+	}
 	jsonMap, ok := jsonData.(map[string]interface{})
 	if !ok {
 		return nil, false
@@ -89,7 +86,7 @@ func checkIfAlreadySARIF(input string) (interface{}, bool) {
 	return jsonData, true
 }
 
-func routeToConverter(tool, input string) (interface{}, error) {
+func routeToConverter(tool string, input interface{}) (interface{}, error) {
 	switch strings.ToLower(tool) {
 	case "trivy":
 		return convertTrivy(input)

@@ -31,53 +31,94 @@ func Gosec(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("expected 'with' to be a map")
 	}
 
-	// Build command arguments
+	args := buildGosecArgs(withMap)
+
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	var stdout, stderr strings.Builder
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	result := map[string]interface{}{
+		"command": strings.Join(args, " "),
+		"output":  stdout.String(),
+		"stderr":  stderr.String(),
+	}
+
+	if err != nil {
+		result["error"] = err.Error()
+		if cmd.ProcessState != nil {
+			result["exit_code"] = cmd.ProcessState.ExitCode()
+		} else {
+			result["exit_code"] = -1
+		}
+	} else {
+		result["exit_code"] = 0
+	}
+
+	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
+		result["output_file"] = outputPath
+	}
+
+	return result, nil
+}
+
+func buildGosecArgs(m map[string]interface{}) []string {
 	args := []string{"gosec"}
 
 	// Format
-	if format, ok := withMap["format"].(string); ok && format != "" {
+	if format, ok := m["format"].(string); ok && format != "" {
 		args = append(args, "-fmt", format)
 	} else {
 		args = append(args, "-fmt", "json")
 	}
 
 	// Output file
-	if output, ok := withMap["output"].(string); ok && output != "" {
+	if output, ok := m["output"].(string); ok && output != "" {
 		args = append(args, "-out", output)
 	}
 
 	// Severity
-	if severity, ok := withMap["severity"].(string); ok && severity != "" {
+	if severity, ok := m["severity"].(string); ok && severity != "" {
 		args = append(args, "-severity", severity)
 	}
 
 	// Confidence
-	if confidence, ok := withMap["confidence"].(string); ok && confidence != "" {
+	if confidence, ok := m["confidence"].(string); ok && confidence != "" {
 		args = append(args, "-confidence", confidence)
 	}
 
 	// Exclude directories
-	if exclude, ok := withMap["exclude"].(string); ok && exclude != "" {
+	if exclude, ok := m["exclude"].(string); ok && exclude != "" {
 		args = append(args, "-exclude", exclude)
 	}
 
 	// Exclude generated files
-	if excludeGenerated, ok := withMap["exclude-generated"].(bool); ok && excludeGenerated {
+	if excludeGenerated, ok := m["exclude-generated"].(bool); ok && excludeGenerated {
 		args = append(args, "-exclude-generated")
 	}
 
 	// Ignore #nosec comments
-	if nosec, ok := withMap["nosec"].(bool); ok && nosec {
+	if nosec, ok := m["nosec"].(bool); ok && nosec {
 		args = append(args, "-nosec")
 	}
 
 	// Include tests
-	if tests, ok := withMap["tests"].(bool); ok && tests {
+	if tests, ok := m["tests"].(bool); ok && tests {
 		args = append(args, "-tests")
 	}
 
+	// no-fail: default true, can be overridden
+	noFail := true
+	if nf, ok := m["no-fail"].(bool); ok {
+		noFail = nf
+	}
+	if noFail {
+		args = append(args, "-no-fail")
+	}
+
 	// Additional arguments
-	if additionalArgs, ok := withMap["additional-args"].([]interface{}); ok {
+	if additionalArgs, ok := m["additional-args"].([]interface{}); ok {
 		for _, arg := range additionalArgs {
 			if argStr, ok := arg.(string); ok {
 				args = append(args, argStr)
@@ -87,31 +128,9 @@ func Gosec(ctx context.Context, with interface{}) (interface{}, error) {
 
 	// Target (default: ./...)
 	target := "./..."
-	if t, ok := withMap["target"].(string); ok && t != "" {
+	if t, ok := m["target"].(string); ok && t != "" {
 		target = t
 	}
 	args = append(args, target)
-
-	// Execute command
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
-	output, err := cmd.CombinedOutput()
-
-	result := map[string]interface{}{
-		"command": strings.Join(args, " "),
-		"output":  string(output),
-	}
-
-	if err != nil {
-		result["error"] = err.Error()
-		result["exit_code"] = cmd.ProcessState.ExitCode()
-	} else {
-		result["exit_code"] = 0
-	}
-
-	// If output file was specified, return the path
-	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
-		result["output_file"] = outputPath
-	}
-
-	return result, nil
+	return args
 }

@@ -1,6 +1,6 @@
 # Scan Git repository
 - name: Scan repository for secrets
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: git
     target: https://github.com/user/repo.git
@@ -9,7 +9,7 @@
 
 # Scan recent commits
 - name: Scan last 100 commits
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: git
     target: .
@@ -18,7 +18,7 @@
 
 # Scan specific branch
 - name: Scan development branch
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: git
     target: https://github.com/user/repo.git
@@ -28,7 +28,7 @@
 
 # Scan filesystem
 - name: Scan filesystem for secrets
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: filesystem
     target: /path/to/code
@@ -37,7 +37,7 @@
 
 # Scan Docker image
 - name: Scan container for secrets
-  using: builtin/tools/trufflehog
+  uses: builtin/tools/trufflehog
   with:
     type: docker
     target: myapp:latest

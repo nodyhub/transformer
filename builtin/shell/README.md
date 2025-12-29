@@ -12,7 +12,7 @@ Execute shell commands in a `sh` shell environment.
 
 ```yml
 - name: Run command
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: date
 ```
@@ -26,7 +26,7 @@ Execute shell commands in a `sh` shell environment.
 
 ```yml
 - name: Show in terminal
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "Hello"
     stdout: stdout
@@ -47,12 +47,12 @@ Returns captured output (stdout and stderr combined) as a string. Only output no
 
 ```yml
 - id: date
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: date
 
 - name: Use output
-  using: builtin/echo
+  uses: builtin/echo
   with:
     message: Date is ${{ outputs.date }}
 ```

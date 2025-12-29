@@ -1,0 +1,15 @@
+# Run Gosec (Go security)
+- id: gosec_scan
+  name: Gosec Security Scan
+  uses: builtin/tools/gosec
+  with:
+    target: ./...
+    format: json
+
+# Convert Gosec output to SARIF
+- id: gosec_sarif
+  name: Convert Gosec to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "gosec"
+    input: ${{ outputs.gosec_scan }}

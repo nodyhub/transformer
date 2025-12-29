@@ -6,7 +6,7 @@ Gosec inspects Go source code for security problems by scanning the Go AST.
 
 ```yaml
 - name: Gosec security scan
-  using: builtin/tools/gosec
+  uses: builtin/tools/gosec
   with:
     target: ./...
     format: sarif

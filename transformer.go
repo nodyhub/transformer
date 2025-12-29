@@ -43,7 +43,7 @@ func Run(ctx context.Context, input interface{}, args []string) error {
 	outputs := make(map[string]interface{})
 
 	for _, step := range s {
-		fn, ok := registry.Get(step.Using)
+		fn, ok := registry.Get(step.Uses)
 		if ok {
 			out, err := fn(ctx, substituteInputs(step.With, outputs, args))
 			if err != nil {
@@ -56,7 +56,7 @@ func Run(ctx context.Context, input interface{}, args []string) error {
 				slog.Debug("output stored", slog.String("id", step.ID), slog.Any("output", out))
 			}
 		} else {
-			return fmt.Errorf("unknown step function: %s", step.Using)
+			return fmt.Errorf("unknown step function (id: %s): %s", step.ID, step.Uses)
 		}
 
 		perf.Mark("step " + step.Name)
@@ -74,7 +74,7 @@ type Step struct {
 	ID       string      `json:"id,omitempty" yaml:"id,omitempty"`
 	LogLevel string      `json:"logLevel,omitempty" yaml:"log_level,omitempty"`
 	Name     string      `json:"name,omitempty" yaml:"name,omitempty"`
-	Using    string      `json:"using" yaml:"using"`
+	Uses     string      `json:"uses" yaml:"uses"`
 	With     interface{} `json:"with,omitempty" yaml:"with,omitempty"`
 }
 
@@ -192,7 +192,7 @@ func substituteOutputsInline(s string, outputs map[string]interface{}) string {
 		if len(matches) == 2 {
 			id := matches[1]
 			if out, ok := outputs[id]; ok {
-				slog.Debug("substituting output", slog.String("id", id), slog.Any("value", out))
+				slog.Debug("substituting output inline", slog.String("id", id), slog.Any("value", out))
 				return fmt.Sprintf("%v", out)
 			}
 		}

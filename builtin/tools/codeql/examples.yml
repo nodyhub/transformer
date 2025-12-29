@@ -1,6 +1,6 @@
 # Create database
 - name: Create CodeQL database
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-create
     database: /tmp/codeql-db
@@ -9,7 +9,7 @@
 
 # Analyze database
 - name: Analyze with CodeQL
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/codeql-db
@@ -20,7 +20,7 @@
 # Complete workflow (Go)
 - name: Create CodeQL database
   id: create-db
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-create
     database: /tmp/codeql-go-db
@@ -28,7 +28,7 @@
     source-root: .
 
 - name: Run security queries
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/codeql-go-db
@@ -40,7 +40,7 @@
 
 # Python analysis
 - name: Analyze Python code
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-create
     database: /tmp/python-db
@@ -48,7 +48,7 @@
     source-root: /workspace
 
 - name: Run Python queries
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/python-db
@@ -58,7 +58,7 @@
 
 # Java analysis with build command
 - name: Create Java database
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-create
     database: /tmp/java-db
@@ -68,7 +68,7 @@
       - --command=mvn clean compile
 
 - name: Analyze Java code
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/java-db
@@ -78,7 +78,7 @@
 
 # Custom query
 - name: Run custom query
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /tmp/codeql-db

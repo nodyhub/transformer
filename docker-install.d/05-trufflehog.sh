@@ -7,7 +7,7 @@ apt-get install -y --no-install-recommends ca-certificates wget tar
 rm -rf /var/lib/apt/lists/*
 
 echo "Installing Trufflehog..."
-TRUFFLEHOG_VERSION="3.82.13"
+TRUFFLEHOG_VERSION="3.92.4"
 # Detect architecture
 ARCH=$(uname -m)
 if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then

@@ -1,8 +1,8 @@
 # Basic Go scan
 - name: Scan Go project
-  using: builtin/tools/gosec
+  uses: builtin/tools/gosec
   with:
-    target: ./...
+    target: "./..."
     format: sarif
     output: gosec.sarif
     severity: medium
@@ -10,7 +10,7 @@
 
 # Scan including test files
 - name: Comprehensive Go scan
-  using: builtin/tools/gosec
+  uses: builtin/tools/gosec
   with:
     target: ./...
     format: json
@@ -20,7 +20,7 @@
 
 # Exclude directories
 - name: Selective Go scan
-  using: builtin/tools/gosec
+  uses: builtin/tools/gosec
   with:
     target: ./...
     format: sarif
@@ -30,7 +30,7 @@
 
 # CI/CD integration
 - name: Gosec CI scan
-  using: builtin/tools/gosec
+  uses: builtin/tools/gosec
   with:
     format: junit-xml
     output: gosec-junit.xml

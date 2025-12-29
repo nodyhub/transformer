@@ -8,9 +8,9 @@ import (
 )
 
 // convertNmap converts Nmap XML or JSON output to SARIF
-func convertNmap(input string) (interface{}, error) {
+func convertNmap(input interface{}) (interface{}, error) {
 	var nmapOutput map[string]interface{}
-	if err := json.Unmarshal([]byte(input), &nmapOutput); err != nil {
+	if err := json.Unmarshal([]byte(input.(string)), &nmapOutput); err != nil {
 		return nil, fmt.Errorf("failed to parse Nmap output (XML not yet supported): %w", err)
 	}
 

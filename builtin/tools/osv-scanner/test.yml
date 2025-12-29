@@ -1,0 +1,23 @@
+# Run OSV-Scanner (dependency vulnerabilities)
+- id: osv_scan
+  name: OSV Dependency Scan
+  uses: "builtin/tools/osv-scanner"
+  with:
+    target: go.mod
+    format: json
+
+# Convert OSV output to SARIF
+- id: osv_sarif
+  name: Convert OSV to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "osv"
+    input: ${{ outputs.osv_scan }}
+
+- id: print_osv_output
+  name: Print OSV SARIF Output
+  uses: "builtin/shell"
+  with:
+    command: |
+      echo "OSV Scanner Sarif:"
+      echo "${{ outputs.osv_sarif }}"

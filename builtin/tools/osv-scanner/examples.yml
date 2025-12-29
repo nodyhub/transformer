@@ -1,6 +1,6 @@
 # Scan all dependencies
 - name: OSV vulnerability scan
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: .
     format: sarif
@@ -9,7 +9,7 @@
 
 # Scan specific lockfile
 - name: Scan package-lock.json
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: package-lock.json
     format: json
@@ -17,7 +17,7 @@
 
 # Go with call analysis
 - name: Scan Go dependencies
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: .
     format: sarif
@@ -26,7 +26,7 @@
 
 # Python requirements
 - name: Scan Python requirements
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: requirements.txt
     format: json
@@ -34,7 +34,7 @@
 
 # Rust Cargo.lock
 - name: Scan Cargo.lock
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: Cargo.lock
     format: sarif
@@ -42,7 +42,7 @@
 
 # Offline scan
 - name: Offline vulnerability scan
-  using: builtin/tools/osv-scanner
+  uses: builtin/tools/osv-scanner
   with:
     target: .
     format: json

@@ -6,7 +6,7 @@ Merge multiple SARIF 2.1.0 reports into a single unified report.
 
 ```yaml
 - name: Merge SARIF reports
-  using: builtin/sarif/merge
+  uses: builtin/sarif/merge
   with:
     reports:
       - ${{ outputs.trivy_sarif }}

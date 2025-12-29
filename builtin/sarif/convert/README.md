@@ -6,7 +6,7 @@ Convert security tool output to SARIF 2.1.0 format.
 
 ```yaml
 - name: Convert Trivy to SARIF
-  using: builtin/sarif/convert
+  uses: builtin/sarif/convert
   with:
     tool: trivy
     input: ${{ outputs.trivy_scan }}

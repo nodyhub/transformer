@@ -10,7 +10,7 @@ Echo messages to standard output.
 
 ```yml
 - name: Print message
-  using: builtin/echo
+  uses: builtin/echo
   with:
     message: Hello World
 ```
@@ -29,12 +29,12 @@ Returns printed content as a string (without trailing newline). Accessible via s
 
 ```yml
 - id: greeting
-  using: builtin/echo
+  uses: builtin/echo
   with:
     message: Hello
 
 - name: Use output
-  using: builtin/echo
+  uses: builtin/echo
   with:
     message: Previous output was ${{ outputs.greeting }}
 ```

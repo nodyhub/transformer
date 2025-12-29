@@ -2,20 +2,20 @@
 
 # Basic command
 - name: Simple command
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "Hello World"
 
 # With output capture
 - id: get_date
   name: Capture date output
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: date
 
 # Multiline script
 - name: Multiple commands
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: |
       echo "Starting..."
@@ -24,56 +24,56 @@
 
 # Using CLI arguments
 - name: Echo first argument
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: |
       echo "First arg is ${{ args.0 }}"
 
 - name: Echo all arguments
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: |
       echo "All args: ${{ args }}"
 
 # Using environment variables
 - name: Show PATH
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "PATH=${{ env.PATH }}"
 
 - name: Show user and home
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "User ${{ env.USER }} at ${{ env.HOME }}"
 
 # Using step outputs
 - id: hostname
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: hostname
 
 - name: Use previous output
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "Running on ${{ outputs.hostname }} at ${{ outputs.get_date }}"
 
 # Output redirection - Show in terminal
 - name: Visible in terminal
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: |
       echo "This appears in terminal"
     stdout: stdout
 
 - name: Errors visible in terminal
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "Error message" >&2
     stderr: stderr
 
 # Output redirection - Merge stderr to stdout
 - name: Merge streams
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: |
       echo "Normal output"
@@ -82,26 +82,26 @@
 
 # Output redirection - Discard output
 - name: Silent execution
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "This is suppressed"
     stdout: discard
 
 - name: Suppress errors
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "Error" >&2
     stderr: discard
 
 # Output redirection - Write to files
 - name: Log to file
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: echo "Logged at $(date)"
     stdout: /tmp/transformer_output.log
 
 - name: Separate logs
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: |
       echo "Normal output"
@@ -112,7 +112,7 @@
 # Complex example combining everything
 - id: complex
   name: Complex command with substitutions
-  using: builtin/shell
+  uses: builtin/shell
   with:
     command: |
       echo "=== System Info ==="

@@ -6,7 +6,7 @@ Nuclei is a fast vulnerability scanner that uses templates to find security issu
 
 ```yaml
 - name: Nuclei vulnerability scan
-  using: builtin/tools/nuclei
+  uses: builtin/tools/nuclei
   with:
     target: https://example.com
     severity: high,critical

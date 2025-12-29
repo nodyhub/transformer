@@ -1,0 +1,27 @@
+# Run CodeQL (code analysis)
+- id: codeql_db
+  name: Create CodeQL DB
+  uses: builtin/tools/codeql
+  with:
+    action: database-create
+    database: /tmp/codeql-db
+    language: go
+    source-root: .
+
+- id: codeql_scan
+  name: CodeQL Analysis
+  uses: builtin/tools/codeql
+  with:
+    action: database-analyze
+    database: /tmp/codeql-db
+    query: security-extended
+    format: sarif-latest
+    output: codeql.sarif
+
+# Convert CodeQL output to SARIF (pass-through)
+- id: codeql_sarif
+  name: Convert CodeQL to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "codeql"
+    input: ${{ outputs.codeql_scan }}

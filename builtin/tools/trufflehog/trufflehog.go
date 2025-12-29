@@ -33,70 +33,11 @@ func Trufflehog(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("expected 'with' to be a map")
 	}
 
-	// Required: target
-	target, ok := withMap["target"].(string)
-	if !ok || target == "" {
-		return nil, fmt.Errorf("'target' field is required")
+	args, err := buildTrufflehogArgs(withMap)
+	if err != nil {
+		return nil, err
 	}
 
-	// Build command arguments
-	args := []string{"trufflehog"}
-
-	// Scan type (default: git)
-	scanType := "git"
-	if t, ok := withMap["type"].(string); ok && t != "" {
-		scanType = t
-	}
-	args = append(args, scanType)
-
-	// JSON output
-	if jsonOutput, ok := withMap["json"].(bool); ok && jsonOutput {
-		args = append(args, "--json")
-	}
-
-	// Only verified
-	if onlyVerified, ok := withMap["only-verified"].(bool); ok && onlyVerified {
-		args = append(args, "--only-verified")
-	}
-
-	// Since commit
-	if sinceCommit, ok := withMap["since-commit"].(string); ok && sinceCommit != "" {
-		args = append(args, "--since-commit", sinceCommit)
-	}
-
-	// Branch
-	if branch, ok := withMap["branch"].(string); ok && branch != "" {
-		args = append(args, "--branch", branch)
-	}
-
-	// Max depth
-	if maxDepth, ok := withMap["max-depth"].(int); ok {
-		args = append(args, "--max-depth", fmt.Sprintf("%d", maxDepth))
-	}
-
-	// Include paths
-	if includePaths, ok := withMap["include-paths"].(string); ok && includePaths != "" {
-		args = append(args, "--include-paths", includePaths)
-	}
-
-	// Exclude paths
-	if excludePaths, ok := withMap["exclude-paths"].(string); ok && excludePaths != "" {
-		args = append(args, "--exclude-paths", excludePaths)
-	}
-
-	// Additional arguments
-	if additionalArgs, ok := withMap["additional-args"].([]interface{}); ok {
-		for _, arg := range additionalArgs {
-			if argStr, ok := arg.(string); ok {
-				args = append(args, argStr)
-			}
-		}
-	}
-
-	// Add target
-	args = append(args, target)
-
-	// Execute command
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 	output, err := cmd.CombinedOutput()
 
@@ -112,10 +53,73 @@ func Trufflehog(ctx context.Context, with interface{}) (interface{}, error) {
 		result["exit_code"] = 0
 	}
 
-	// If output file was specified, return the path
 	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
 		result["output_file"] = outputPath
 	}
 
 	return result, nil
+}
+
+func buildTrufflehogArgs(m map[string]interface{}) ([]string, error) {
+	target, ok := m["target"].(string)
+	if !ok || target == "" {
+		return nil, fmt.Errorf("'target' field is required")
+	}
+
+	args := []string{"trufflehog"}
+
+	// Scan type (default: git)
+	scanType := "git"
+	if t, ok := m["type"].(string); ok && t != "" {
+		scanType = t
+	}
+	args = append(args, scanType)
+
+	// JSON output
+	if jsonOutput, ok := m["json"].(bool); ok && jsonOutput {
+		args = append(args, "--json")
+	}
+
+	// Only verified
+	if onlyVerified, ok := m["only-verified"].(bool); ok && onlyVerified {
+		args = append(args, "--only-verified")
+	}
+
+	// Since commit
+	if sinceCommit, ok := m["since-commit"].(string); ok && sinceCommit != "" {
+		args = append(args, "--since-commit", sinceCommit)
+	}
+
+	// Branch
+	if branch, ok := m["branch"].(string); ok && branch != "" {
+		args = append(args, "--branch", branch)
+	}
+
+	// Max depth
+	if maxDepth, ok := m["max-depth"].(int); ok {
+		args = append(args, "--max-depth", fmt.Sprintf("%d", maxDepth))
+	}
+
+	// Include paths
+	if includePaths, ok := m["include-paths"].(string); ok && includePaths != "" {
+		args = append(args, "--include-paths", includePaths)
+	}
+
+	// Exclude paths
+	if excludePaths, ok := m["exclude-paths"].(string); ok && excludePaths != "" {
+		args = append(args, "--exclude-paths", excludePaths)
+	}
+
+	// Additional arguments
+	if additionalArgs, ok := m["additional-args"].([]interface{}); ok {
+		for _, arg := range additionalArgs {
+			if argStr, ok := arg.(string); ok {
+				args = append(args, argStr)
+			}
+		}
+	}
+
+	// Add target
+	args = append(args, target)
+	return args, nil
 }

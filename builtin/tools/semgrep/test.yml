@@ -1,0 +1,32 @@
+# Run Semgrep (static analysis)
+- id: semgrep_scan
+  name: Semgrep Static Analysis
+  uses: builtin/tools/semgrep
+  with:
+    target: .
+    config: auto
+    format: json
+
+# - id: print_semgrep_output
+#   name: Print Semgrep Output
+#   uses: "builtin/shell"
+#   with:
+#     command: |
+#       echo "Semgrep Scan Json:"
+#       echo '${{ outputs.semgrep_scan }}'
+
+# Convert Semgrep output to SARIF
+- id: semgrep_sarif
+  name: Convert Semgrep to SARIF
+  uses: builtin/sarif/convert
+  with:
+    tool: "semgrep"
+    input: ${{ outputs.semgrep_scan }}
+
+- id: print_semgrep_sarif
+  name: Print Semgrep Sarif Output
+  uses: "builtin/shell"
+  with:
+    command: |
+      echo "Semgrep Sarif:"
+      echo '${{ outputs.semgrep_sarif }}'

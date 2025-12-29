@@ -8,9 +8,14 @@ import (
 )
 
 // convertGosec converts Gosec JSON output to SARIF
-func convertGosec(input string) (interface{}, error) {
-	var gosecOutput map[string]interface{}
-	if err := json.Unmarshal([]byte(input), &gosecOutput); err != nil {
+func convertGosec(input interface{}) (interface{}, error) {
+	gosecOutput, ok := input.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid Gosec output format: expected a JSON object, got %T", input)
+	}
+
+	var gosecJson map[string]interface{}
+	if err := json.Unmarshal([]byte(gosecOutput["output"].(string)), &gosecJson); err != nil {
 		return nil, fmt.Errorf("failed to parse Gosec output: %w", err)
 	}
 

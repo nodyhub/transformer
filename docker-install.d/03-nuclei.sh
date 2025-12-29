@@ -7,7 +7,7 @@ apt-get install -y --no-install-recommends ca-certificates wget unzip
 rm -rf /var/lib/apt/lists/*
 
 echo "Installing Nuclei..."
-NUCLEI_VERSION="3.3.6"
+NUCLEI_VERSION="3.6.1"
 wget -qO nuclei.zip "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION}_linux_amd64.zip"
 unzip nuclei.zip -d /usr/local/bin
 rm nuclei.zip

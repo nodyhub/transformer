@@ -31,99 +31,120 @@ func CodeQL(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("expected 'with' to be a map")
 	}
 
-	// Build command arguments
-	args := []string{"codeql"}
-
-	// Action (default: database-analyze if database exists)
-	action := "database-analyze"
-	if a, ok := withMap["action"].(string); ok && a != "" {
-		action = a
-	}
-	args = append(args, action)
-
-	// Database path (required)
-	database, ok := withMap["database"].(string)
-	if !ok || database == "" {
+	action := getString(withMap, "action", "database-analyze")
+	database := getString(withMap, "database", "")
+	if database == "" {
 		return nil, fmt.Errorf("'database' field is required")
 	}
 
-	// Handle different actions
+	var args []string
+	args = append(args, "codeql", action)
+
 	switch action {
 	case "database-create":
-		args = append(args, database)
-
-		// Language (required for database-create)
-		if language, ok := withMap["language"].(string); ok && language != "" {
-			args = append(args, "--language="+language)
-		} else {
-			return nil, fmt.Errorf("'language' field is required for database-create")
+		a, err := buildCreateArgs(withMap, database)
+		if err != nil {
+			return nil, err
 		}
-
-		// Source root
-		if sourceRoot, ok := withMap["source-root"].(string); ok && sourceRoot != "" {
-			args = append(args, "--source-root="+sourceRoot)
-		}
-
+		args = append(args, a...)
 	case "database-analyze", "analyze":
-		args = append(args, database)
-
-		// Query pack or file
-		if query, ok := withMap["query"].(string); ok && query != "" {
-			args = append(args, query)
-		}
-
-		// Format
-		if format, ok := withMap["format"].(string); ok && format != "" {
-			args = append(args, "--format="+format)
-		} else {
-			args = append(args, "--format=sarif-latest")
-		}
-
-		// Output file
-		if output, ok := withMap["output"].(string); ok && output != "" {
-			args = append(args, "--output="+output)
-		}
+		args = append(args, buildAnalyzeArgs(withMap, database)...)
 	}
 
-	// Threads
-	if threads, ok := withMap["threads"].(int); ok {
+	args = append(args, buildCommonArgs(withMap)...)
+
+	// Execute command
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	var stdout, stderr strings.Builder
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+
+	result := map[string]interface{}{
+		"command": strings.Join(args, " "),
+		"output":  stdout.String(),
+		"stderr":  stderr.String(),
+	}
+
+	if err != nil {
+		result["error"] = err.Error()
+		if cmd.ProcessState != nil {
+			result["exit_code"] = cmd.ProcessState.ExitCode()
+		} else {
+			result["exit_code"] = -1
+		}
+	} else {
+		result["exit_code"] = 0
+	}
+
+	if outputPath := getString(withMap, "output", ""); outputPath != "" {
+		result["output_file"] = outputPath
+	}
+
+	return result, nil
+}
+
+func getString(m map[string]interface{}, key, def string) string {
+	if v, ok := m[key]; ok {
+		if s, ok := v.(string); ok && s != "" {
+			return s
+		}
+	}
+	return def
+}
+
+func getInt(m map[string]interface{}, key string) (int, bool) {
+	if v, ok := m[key]; ok {
+		if i, ok := v.(int); ok {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+func buildCreateArgs(m map[string]interface{}, database string) ([]string, error) {
+	args := []string{database}
+	language := getString(m, "language", "")
+	if language == "" {
+		return nil, fmt.Errorf("'language' field is required for database-create")
+	}
+	args = append(args, "--language="+language)
+	if sourceRoot := getString(m, "source-root", ""); sourceRoot != "" {
+		args = append(args, "--source-root="+sourceRoot)
+	}
+	return args, nil
+}
+
+func buildAnalyzeArgs(m map[string]interface{}, database string) []string {
+	args := []string{database}
+	if query := getString(m, "query", ""); query != "" {
+		args = append(args, query)
+	}
+	if format := getString(m, "format", ""); format != "" {
+		args = append(args, "--format="+format)
+	} else {
+		args = append(args, "--format=sarif-latest")
+	}
+	if output := getString(m, "output", ""); output != "" {
+		args = append(args, "--output="+output)
+	}
+	return args
+}
+
+func buildCommonArgs(m map[string]interface{}) []string {
+	args := []string{}
+	if threads, ok := getInt(m, "threads"); ok {
 		args = append(args, fmt.Sprintf("--threads=%d", threads))
 	}
-
-	// RAM
-	if ram, ok := withMap["ram"].(int); ok {
+	if ram, ok := getInt(m, "ram"); ok {
 		args = append(args, fmt.Sprintf("--ram=%d", ram))
 	}
-
-	// Additional arguments
-	if additionalArgs, ok := withMap["additional-args"].([]interface{}); ok {
+	if additionalArgs, ok := m["additional-args"].([]interface{}); ok {
 		for _, arg := range additionalArgs {
 			if argStr, ok := arg.(string); ok {
 				args = append(args, argStr)
 			}
 		}
 	}
-
-	// Execute command
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
-	output, err := cmd.CombinedOutput()
-
-	result := map[string]interface{}{
-		"command": strings.Join(args, " "),
-		"output":  string(output),
-	}
-
-	if err != nil {
-		result["error"] = err.Error()
-		result["exit_code"] = cmd.ProcessState.ExitCode()
-	} else {
-		result["exit_code"] = 0
-	}
-
-	// If output file was specified, return the path
-	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
-		result["output_file"] = outputPath
-	}
-
-	return result, nil
+	return args
 }

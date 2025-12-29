@@ -6,7 +6,7 @@ CodeQL is GitHub's semantic code analysis engine for discovering vulnerabilities
 
 ```yaml
 - name: Analyze code with CodeQL
-  using: builtin/tools/codeql
+  uses: builtin/tools/codeql
   with:
     action: database-analyze
     database: /path/to/codeql-db

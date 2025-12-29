@@ -34,14 +34,14 @@ See [suppress/README.md](suppress/README.md) for details and examples.
 # Convert tool outputs to SARIF
 - name: Convert Trivy to SARIF
   id: trivy_sarif
-  using: builtin/sarif
+  uses: builtin/sarif
   with:
     tool: trivy
     input: ${{ outputs.trivy_scan }}
 
 - name: Convert Semgrep to SARIF
   id: semgrep_sarif
-  using: builtin/sarif
+  uses: builtin/sarif
   with:
     tool: semgrep
     input: ${{ outputs.semgrep_scan }}
@@ -49,7 +49,7 @@ See [suppress/README.md](suppress/README.md) for details and examples.
 # Merge reports
 - name: Merge reports
   id: merged
-  using: builtin/sarif/merge
+  uses: builtin/sarif/merge
   with:
     reports:
       - ${{ outputs.trivy_sarif }}
@@ -57,7 +57,7 @@ See [suppress/README.md](suppress/README.md) for details and examples.
 
 # Suppress false positives
 - name: Suppress vendor files
-  using: builtin/sarif/suppress
+  uses: builtin/sarif/suppress
   with:
     input: ${{ outputs.merged }}
     path_patterns:
@@ -187,7 +187,7 @@ Combine multiple criteria:
 steps:
   # Run Trivy container scan
   - id: trivy_scan
-    using: builtin/tools/trivy
+    uses: builtin/tools/trivy
     with:
       type: image
       target: nginx:latest
@@ -195,7 +195,7 @@ steps:
   
   # Run Semgrep code scan
   - id: semgrep_scan
-    using: builtin/tools/semgrep
+    uses: builtin/tools/semgrep
     with:
       target: .
       config: auto
@@ -203,33 +203,33 @@ steps:
   
   # Run Nuclei web scan
   - id: nuclei_scan
-    using: builtin/tools/nuclei
+    uses: builtin/tools/nuclei
     with:
       target: https://example.com
       format: json
   
   # Convert to SARIF
   - id: trivy_sarif
-    using: builtin/sarif/convert
+    uses: builtin/sarif/convert
     with:
       tool: trivy
       input: ${{ outputs.trivy_scan }}
   
   - id: semgrep_sarif
-    using: builtin/sarif/convert
+    uses: builtin/sarif/convert
     with:
       tool: semgrep
       input: ${{ outputs.semgrep_scan }}
   
   - id: nuclei_sarif
-    using: builtin/sarif/convert
+    uses: builtin/sarif/convert
     with:
       tool: nuclei
       input: ${{ outputs.nuclei_scan }}
   
   # Merge all reports
   - id: unified_report
-    using: builtin/sarif/merge
+    uses: builtin/sarif/merge
     with:
       reports:
         - ${{ outputs.trivy_sarif }}
@@ -238,13 +238,13 @@ steps:
   
   # Save to file
   - id: save_report
-    using: builtin/file/write
+    uses: builtin/file/write
     with:
       path: "security-scan-results.sarif"
       content: ${{ outputs.unified_report }}
   
   # Print confirmation
-  - using: builtin/echo
+  - uses: builtin/echo
     with:
       message: "Unified SARIF report saved to security-scan-results.sarif"
 ```
