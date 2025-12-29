@@ -50,8 +50,6 @@
   with:
     action: database-analyze
     database: /tmp/codeql-db
-    language: go
-    query: codeql/go-queries
     format: sarif-latest
     output: codeql.sarif
 

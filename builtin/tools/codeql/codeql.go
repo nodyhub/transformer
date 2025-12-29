@@ -108,12 +108,6 @@ func buildCreateArgs(m map[string]interface{}, database string) ([]string, error
 func buildAnalyzeArgs(m map[string]interface{}, database string) []string {
 	args := []string{database}
 	query := getString(m, "query", "")
-	if query == "" {
-		language := getString(m, "language", "")
-		if language != "" {
-			query = "codeql/" + language + "-queries"
-		}
-	}
 	if query != "" {
 		args = append(args, query)
 	}
