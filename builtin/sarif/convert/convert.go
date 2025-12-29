@@ -76,6 +76,7 @@ func extractInput(withMap map[string]interface{}) (interface{}, error) {
 		return inputRaw, nil
 	}
 
+	//nolint:nilerr
 	if _, err := os.Stat(inputStr); err != nil {
 		// not a file, treat as raw content
 		return inputStr, nil
@@ -84,11 +85,11 @@ func extractInput(withMap map[string]interface{}) (interface{}, error) {
 	// it's a file, read content
 	absPath, err := filepath.Abs(inputStr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get absolute path of input file: %v", err)
+		return nil, fmt.Errorf("failed to get absolute path of input file: %w", err)
 	}
 	content, err := os.ReadFile(absPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read input file: %v", err)
+		return nil, fmt.Errorf("failed to read input file: %w", err)
 	}
 
 	return string(content), nil

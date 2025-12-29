@@ -54,6 +54,7 @@ func Shell(ctx context.Context, with interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	//nolint:govet
 	defer func() {
 		if err := stdoutWrapper.Close(); err != nil {
 			slog.Error("failed to close stdout writer", "error", err)
@@ -87,7 +88,7 @@ func Shell(ctx context.Context, with interface{}) (interface{}, error) {
 		result["error"] = err.Error()
 	}
 
-	return result, nil
+	return result, err
 }
 
 func setupWriters(cmd *exec.Cmd, stdoutSet bool, stdoutPath string, stderrSet bool, stderrPath string, outputBuffer *bytes.Buffer) (writerWrapper, writerWrapper, error) {
