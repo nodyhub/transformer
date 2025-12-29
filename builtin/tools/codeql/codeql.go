@@ -38,17 +38,21 @@ func CodeQL(ctx context.Context, with interface{}) (interface{}, error) {
 	}
 
 	var args []string
-	args = append(args, "codeql", action)
+	args = append(args, "codeql")
 
 	switch action {
 	case "database-create":
+		args = append(args, "database", "create")
 		a, err := buildCreateArgs(withMap, database)
 		if err != nil {
 			return nil, err
 		}
 		args = append(args, a...)
 	case "database-analyze", "analyze":
+		args = append(args, "database", "analyze")
 		args = append(args, buildAnalyzeArgs(withMap, database)...)
+	default:
+		args = append(args, action)
 	}
 
 	args = append(args, buildCommonArgs(withMap)...)
