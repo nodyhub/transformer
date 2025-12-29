@@ -3,9 +3,13 @@
 # Default target
 all: build
 
+VERSION ?= $(shell git describe --tags --always --dirty)
+COMMIT  ?= $(shell git rev-parse HEAD)
+BUILDTIME ?= $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
+
 # Build the binary
 build:
-	go build -o bin/transformer ./cmd/transformer
+	go build -ldflags "-X 'cmd.Version=$(VERSION)' -X 'cmd.Commit=$(COMMIT)' -X 'cmd.BuildTime=$(BUILDTIME)'" -o bin/transformer ./cmd
 
 # Build binaries for multiple architectures
 release:
