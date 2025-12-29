@@ -3,28 +3,31 @@
 # Default target
 all: build
 
+
 VERSION ?= $(shell git describe --tags --always --dirty)
 COMMIT  ?= $(shell git rev-parse HEAD)
 BUILDTIME ?= $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
+LDFLAGS = -ldflags "-X 'github.com/nodyhub/transformer/cmd.Version=$(VERSION)' -X 'github.com/nodyhub/transformer/cmd.Commit=$(COMMIT)' -X 'github.com/nodyhub/transformer/cmd.BuildTime=$(BUILDTIME)'"
+
 
 # Build the binary
 build:
-	go build -ldflags "-X 'cmd.Version=$(VERSION)' -X 'cmd.Commit=$(COMMIT)' -X 'cmd.BuildTime=$(BUILDTIME)'" -o bin/transformer ./cmd
+	go build $(LDFLAGS) -o bin/transformer ./cmd
 
 # Build binaries for multiple architectures
 release:
 	@echo "Building release binaries..."
 	@mkdir -p bin/release
-	GOOS=linux GOARCH=amd64 go build -o bin/release/transformer-linux-amd64 ./cmd/transformer
-	GOOS=linux GOARCH=arm64 go build -o bin/release/transformer-linux-arm64 ./cmd/transformer
-	GOOS=darwin GOARCH=amd64 go build -o bin/release/transformer-darwin-amd64 ./cmd/transformer
-	GOOS=darwin GOARCH=arm64 go build -o bin/release/transformer-darwin-arm64 ./cmd/transformer
-	GOOS=windows GOARCH=amd64 go build -o bin/release/transformer-windows-amd64.exe ./cmd/transformer
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o bin/release/transformer-linux-amd64 ./cmd/transformer
+	GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o bin/release/transformer-linux-arm64 ./cmd/transformer
+	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o bin/release/transformer-darwin-amd64 ./cmd/transformer
+	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o bin/release/transformer-darwin-arm64 ./cmd/transformer
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o bin/release/transformer-windows-amd64.exe ./cmd/transformer
 	@echo "Release binaries built in bin/release/"
 
 # Install the binary to $GOPATH/bin
 install:
-	go install ./cmd/transformer
+	go install $(LDFLAGS) ./cmd/transformer
 
 # Run tests
 test:
