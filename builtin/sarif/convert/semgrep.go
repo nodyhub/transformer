@@ -9,14 +9,16 @@ import (
 
 // convertSemgrep converts Semgrep JSON output to SARIF
 func convertSemgrep(input interface{}) (interface{}, error) {
-	semgrepOutput, ok := input.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("invalid Semgrep output format: expected a JSON object, got %T", input)
-	}
-
 	var semgrepJson map[string]interface{}
-	if err := json.Unmarshal([]byte(semgrepOutput["output"].(string)), &semgrepJson); err != nil {
-		return nil, fmt.Errorf("failed to parse Semgrep output: %w", err)
+	switch v := input.(type) {
+	case string:
+		if err := json.Unmarshal([]byte(v), &semgrepJson); err != nil {
+			return nil, fmt.Errorf("invalid Semgrep output format: could not parse string as JSON object: %w", err)
+		}
+	case map[string]interface{}:
+		semgrepJson = v
+	default:
+		return nil, fmt.Errorf("invalid Semgrep output format: expected a JSON object or string, got %T", input)
 	}
 
 	results := []common.Result{}

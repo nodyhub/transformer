@@ -9,19 +9,16 @@ import (
 
 // convertOSV converts OSV Scanner JSON output to SARIF
 func convertOSV(input interface{}) (interface{}, error) {
-	osvResult, ok := input.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("invalid OSV output format: expected a JSON object, got %T", input)
-	}
-
-	osvOutputString, ok := osvResult["output"].(string)
-	if !ok {
-		return nil, fmt.Errorf("failed to extract OSV output, missing 'output' field or invalid format: %T", osvResult["output"])
-	}
-
 	var osvOutput map[string]interface{}
-	if err := json.Unmarshal([]byte(osvOutputString), &osvOutput); err != nil {
-		return nil, fmt.Errorf("failed to parse OSV output JSON: %w", err)
+	switch v := input.(type) {
+	case string:
+		if err := json.Unmarshal([]byte(v), &osvOutput); err != nil {
+			return nil, fmt.Errorf("invalid OSV output format: could not parse string as JSON object: %w", err)
+		}
+	case map[string]interface{}:
+		osvOutput = v
+	default:
+		return nil, fmt.Errorf("invalid OSV output format: expected a JSON object or string, got %T", input)
 	}
 
 	results := []common.Result{}

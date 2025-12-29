@@ -9,20 +9,22 @@ import (
 
 // convertGosec converts Gosec JSON output to SARIF
 func convertGosec(input interface{}) (interface{}, error) {
-	gosecOutput, ok := input.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("invalid Gosec output format: expected a JSON object, got %T", input)
-	}
-
 	var gosecJson map[string]interface{}
-	if err := json.Unmarshal([]byte(gosecOutput["output"].(string)), &gosecJson); err != nil {
-		return nil, fmt.Errorf("failed to parse Gosec output: %w", err)
+	switch v := input.(type) {
+	case string:
+		if err := json.Unmarshal([]byte(v), &gosecJson); err != nil {
+			return nil, fmt.Errorf("invalid Gosec output format: could not parse string as JSON object: %w", err)
+		}
+	case map[string]interface{}:
+		gosecJson = v
+	default:
+		return nil, fmt.Errorf("invalid Gosec output format: expected a JSON object or string, got %T", input)
 	}
 
 	results := []common.Result{}
 
 	// Gosec output has "Issues" array
-	if issuesRaw, ok := gosecOutput["Issues"].([]interface{}); ok {
+	if issuesRaw, ok := gosecJson["Issues"].([]interface{}); ok {
 		for _, issueRaw := range issuesRaw {
 			issueMap, ok := issueRaw.(map[string]interface{})
 			if !ok {

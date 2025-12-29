@@ -33,6 +33,7 @@ lint:
 # Build Docker image
 image:
 	docker build  --build-arg MODULES="all" -t transformer:latest .
+	docker tag transformer:latest ghcr.io/nodyhub/transformer:latest
 
 
 # Clean build artifacts
