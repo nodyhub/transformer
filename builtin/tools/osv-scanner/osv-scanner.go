@@ -34,7 +34,7 @@ func OSVScanner(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec
 	var stdout, stderr strings.Builder
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

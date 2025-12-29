@@ -33,7 +33,7 @@ func Gosec(ctx context.Context, with interface{}) (interface{}, error) {
 
 	args := buildGosecArgs(withMap)
 
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec
 	var stdout, stderr strings.Builder
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

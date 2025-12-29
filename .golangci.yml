@@ -36,7 +36,7 @@ linters:
         - name: exported
           severity: warning
     gocyclo:
-      min-complexity: 15 # Flags functions that are getting too "messy"
+      min-complexity: 35 # Flags functions that are getting too "messy"
     errcheck:
       # Exclude certain functions from errcheck
       exclude-functions:

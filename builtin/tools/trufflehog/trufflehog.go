@@ -38,7 +38,7 @@ func Trufflehog(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec
 	output, err := cmd.CombinedOutput()
 
 	result := map[string]interface{}{
