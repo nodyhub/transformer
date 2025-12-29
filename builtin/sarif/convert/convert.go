@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/nodyhub/transformer/registry"
@@ -56,7 +58,28 @@ func extractInput(withMap map[string]interface{}) (interface{}, error) {
 		return "", fmt.Errorf("'input' field is required")
 	}
 
-	return inputRaw, nil
+	// check if inputRaw is a filepath or raw content
+	inputStr, isString := inputRaw.(string)
+	if !isString {
+		return inputRaw, nil
+	}
+
+	if _, err := os.Stat(inputStr); err != nil {
+		// not a file, treat as raw content
+		return inputStr, nil
+	}
+
+	// it's a file, read content
+	absPath, err := filepath.Abs(inputStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get absolute path of input file: %v", err)
+	}
+	content, err := os.ReadFile(absPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read input file: %v", err)
+	}
+
+	return string(content), nil
 }
 
 func checkIfAlreadySARIF(input interface{}) (interface{}, bool) {
