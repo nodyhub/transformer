@@ -50,7 +50,8 @@
   with:
     action: database-analyze
     database: /tmp/codeql-db
-    query: security-extended
+    language: go
+    query: codeql/go-queries
     format: sarif-latest
     output: codeql.sarif
 
