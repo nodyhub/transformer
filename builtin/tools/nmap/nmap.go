@@ -3,7 +3,6 @@ package nmap
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/nodyhub/transformer/registry"
@@ -37,26 +36,17 @@ func Nmap(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec
-	output, err := cmd.CombinedOutput()
-
-	result := map[string]interface{}{
-		"command": strings.Join(args, " "),
-		"output":  string(output),
+	cmdStr := strings.Join(args, " ")
+	shellInput := map[string]interface{}{
+		"command": cmdStr,
 	}
-
-	if err != nil {
-		result["error"] = err.Error()
-		result["exit_code"] = cmd.ProcessState.ExitCode()
-	} else {
-		result["exit_code"] = 0
+	if v, ok := withMap["stdout"]; ok {
+		shellInput["stdout"] = v
 	}
-
-	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
-		result["output_file"] = outputPath
+	if v, ok := withMap["stderr"]; ok {
+		shellInput["stderr"] = v
 	}
-
-	return result, nil
+	return registry.Call(ctx, "builtin/shell", shellInput)
 }
 
 func buildNmapArgs(m map[string]interface{}) ([]string, error) {

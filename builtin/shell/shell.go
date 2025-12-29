@@ -63,13 +63,31 @@ func Shell(ctx context.Context, with interface{}) (interface{}, error) {
 		}
 	}()
 
-	// Execute the command
-	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("failed to execute shell command: %w\n%s", err, command)
+	var stderrBuffer strings.Builder
+	// If not redirected, also capture stderr
+	if !stderrSet {
+		cmd.Stderr = &stderrBuffer
 	}
 
-	// Return captured output (only what wasn't redirected)
-	return strings.TrimSuffix(outputBuffer.String(), "\n"), nil
+	err = cmd.Run()
+
+	result := map[string]interface{}{
+		"command": command,
+		"output":  strings.TrimSuffix(outputBuffer.String(), "\n"),
+		"stderr":  strings.TrimSuffix(stderrBuffer.String(), "\n"),
+	}
+
+	if cmd.ProcessState != nil {
+		result["exit_code"] = cmd.ProcessState.ExitCode()
+	} else {
+		result["exit_code"] = -1
+	}
+
+	if err != nil {
+		result["error"] = err.Error()
+	}
+
+	return result, nil
 }
 
 func setupWriters(cmd *exec.Cmd, stdoutSet bool, stdoutPath string, stderrSet bool, stderrPath string, outputBuffer *bytes.Buffer) (writerWrapper, writerWrapper, error) {

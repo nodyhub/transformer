@@ -17,10 +17,10 @@ func TestShell_SimpleCommand(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
+	resMap := result.(map[string]interface{})
 	expected := "Hello World"
-	if result != expected {
-		t.Errorf("expected '%s', got '%v'", expected, result)
+	if resMap["output"] != expected {
+		t.Errorf("expected '%s', got '%v'", expected, resMap["output"])
 	}
 }
 
@@ -34,10 +34,10 @@ func TestShell_CommandWithOutput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
+	resMap := result.(map[string]interface{})
 	expected := "line1\nline2"
-	if result != expected {
-		t.Errorf("expected '%s', got '%v'", expected, result)
+	if resMap["output"] != expected {
+		t.Errorf("expected '%s', got '%v'", expected, resMap["output"])
 	}
 }
 
@@ -51,10 +51,10 @@ func TestShell_MultilineCommand(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
+	resMap := result.(map[string]interface{})
 	expected := "first\nsecond\nthird"
-	if result != expected {
-		t.Errorf("expected '%s', got '%v'", expected, result)
+	if resMap["output"] != expected {
+		t.Errorf("expected '%s', got '%v'", expected, resMap["output"])
 	}
 }
 
@@ -72,10 +72,10 @@ func TestShell_StdoutRedirectToFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	// Should return empty since output was redirected
-	if result != "" {
-		t.Errorf("expected empty result, got '%v'", result)
+	resMap := result.(map[string]interface{})
+	// Should return empty output since redirected
+	if resMap["output"] != "" {
+		t.Errorf("expected empty result, got '%v'", resMap["output"])
 	}
 
 	// Check file contents
@@ -104,10 +104,10 @@ func TestShell_StderrRedirectToFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	// Should return empty since stderr was redirected
-	if result != "" {
-		t.Errorf("expected empty result, got '%v'", result)
+	resMap := result.(map[string]interface{})
+	// Should return empty output since redirected
+	if resMap["output"] != "" {
+		t.Errorf("expected empty result, got '%v'", resMap["output"])
 	}
 
 	// Check file contents
@@ -133,9 +133,9 @@ func TestShell_StdoutDiscard(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	if result != "" {
-		t.Errorf("expected empty result, got '%v'", result)
+	resMap := result.(map[string]interface{})
+	if resMap["output"] != "" {
+		t.Errorf("expected empty result, got '%v'", resMap["output"])
 	}
 }
 
@@ -150,9 +150,9 @@ func TestShell_StderrDiscard(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	if result != "" {
-		t.Errorf("expected empty result, got '%v'", result)
+	resMap := result.(map[string]interface{})
+	if resMap["output"] != "" {
+		t.Errorf("expected empty result, got '%v'", resMap["output"])
 	}
 }
 
@@ -167,13 +167,13 @@ func TestShell_MergeStderrToStdout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
+	resMap := result.(map[string]interface{})
 	// Both should be captured together
-	if !strings.Contains(result.(string), "stdout") {
-		t.Errorf("expected result to contain 'stdout', got '%v'", result)
+	if !strings.Contains(resMap["output"].(string), "stdout") {
+		t.Errorf("expected result to contain 'stdout', got '%v'", resMap["output"])
 	}
-	if !strings.Contains(result.(string), "stderr") {
-		t.Errorf("expected result to contain 'stderr', got '%v'", result)
+	if !strings.Contains(resMap["output"].(string), "stderr") {
+		t.Errorf("expected result to contain 'stderr', got '%v'", resMap["output"])
 	}
 }
 
@@ -188,13 +188,13 @@ func TestShell_MergeStdoutToStderr(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	// Both should be captured together
-	if !strings.Contains(result.(string), "stdout") {
-		t.Errorf("expected result to contain 'stdout', got '%v'", result)
+	resMap := result.(map[string]interface{})
+	// stdout should be in output, stderr should be in stderr
+	if !strings.Contains(resMap["output"].(string), "stdout") {
+		t.Errorf("expected output to contain 'stdout', got '%v'", resMap["output"])
 	}
-	if !strings.Contains(result.(string), "stderr") {
-		t.Errorf("expected result to contain 'stderr', got '%v'", result)
+	if !strings.Contains(resMap["stderr"].(string), "stderr") {
+		t.Errorf("expected stderr to contain 'stderr', got '%v'", resMap["stderr"])
 	}
 }
 
@@ -215,10 +215,10 @@ func TestShell_BothRedirectedToFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	// Should return empty since both were redirected
-	if result != "" {
-		t.Errorf("expected empty result, got '%v'", result)
+	resMap := result.(map[string]interface{})
+	// Should return empty output since both were redirected
+	if resMap["output"] != "" {
+		t.Errorf("expected empty result, got '%v'", resMap["output"])
 	}
 
 	// Check stdout file
@@ -246,13 +246,16 @@ func TestShell_CommandFailure(t *testing.T) {
 		"command": "exit 1",
 	}
 
-	_, err := Shell(ctx, with)
-	if err == nil {
-		t.Fatal("expected error for failed command")
+	result, err := Shell(ctx, with)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-
-	if !strings.Contains(err.Error(), "failed to execute shell command") {
-		t.Errorf("unexpected error message: %v", err)
+	resMap := result.(map[string]interface{})
+	if resMap["exit_code"].(int) == 0 {
+		t.Fatal("expected non-zero exit code for failed command")
+	}
+	if resMap["error"] == nil || resMap["error"] == "" {
+		t.Errorf("expected error message in result, got '%v'", resMap["error"])
 	}
 }
 
@@ -313,10 +316,10 @@ func TestShell_EmptyCommand(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
+	resMap := result.(map[string]interface{})
 	// Empty command should return empty output
-	if result != "" {
-		t.Errorf("expected empty result, got '%v'", result)
+	if resMap["output"] != "" {
+		t.Errorf("expected empty result, got '%v'", resMap["output"])
 	}
 }
 
@@ -330,14 +333,13 @@ func TestShell_CaptureStdoutAndStderr(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
-	// Both stdout and stderr should be captured
-	resultStr := result.(string)
-	if !strings.Contains(resultStr, "normal") {
-		t.Errorf("expected result to contain 'normal', got '%s'", resultStr)
+	resMap := result.(map[string]interface{})
+	// stdout should be in output, stderr should be in stderr
+	if !strings.Contains(resMap["output"].(string), "normal") {
+		t.Errorf("expected output to contain 'normal', got '%s'", resMap["output"])
 	}
-	if !strings.Contains(resultStr, "error") {
-		t.Errorf("expected result to contain 'error', got '%s'", resultStr)
+	if !strings.Contains(resMap["stderr"].(string), "error") {
+		t.Errorf("expected stderr to contain 'error', got '%s'", resMap["stderr"])
 	}
 }
 

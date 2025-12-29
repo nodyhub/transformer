@@ -3,7 +3,6 @@ package gosec
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/nodyhub/transformer/registry"
@@ -33,34 +32,22 @@ func Gosec(ctx context.Context, with interface{}) (interface{}, error) {
 
 	args := buildGosecArgs(withMap)
 
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec
-	var stdout, stderr strings.Builder
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
+	// Build the command string
+	cmdStr := strings.Join(args, " ")
 
-	result := map[string]interface{}{
-		"command": strings.Join(args, " "),
-		"output":  stdout.String(),
-		"stderr":  stderr.String(),
+	shellInput := map[string]interface{}{
+		"command": cmdStr,
+	}
+	// Optionally pass through stdout/stderr/output if present in withMap
+	if v, ok := withMap["stdout"]; ok {
+		shellInput["stdout"] = v
+	}
+	if v, ok := withMap["stderr"]; ok {
+		shellInput["stderr"] = v
 	}
 
-	if err != nil {
-		result["error"] = err.Error()
-		if cmd.ProcessState != nil {
-			result["exit_code"] = cmd.ProcessState.ExitCode()
-		} else {
-			result["exit_code"] = -1
-		}
-	} else {
-		result["exit_code"] = 0
-	}
-
-	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
-		result["output_file"] = outputPath
-	}
-
-	return result, nil
+	// Call builtin/shell
+	return registry.Call(ctx, "builtin/shell", shellInput)
 }
 
 func buildGosecArgs(m map[string]interface{}) []string {

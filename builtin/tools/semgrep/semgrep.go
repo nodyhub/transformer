@@ -3,7 +3,6 @@ package semgrep
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/nodyhub/transformer/registry"
@@ -32,34 +31,17 @@ func Semgrep(ctx context.Context, with interface{}) (interface{}, error) {
 
 	args := buildSemgrepArgs(withMap)
 
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...) // #nosec
-	var stdout, stderr strings.Builder
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
-	result := map[string]interface{}{
-		"command": strings.Join(args, " "),
-		"output":  stdout.String(),
-		"stderr":  stderr.String(),
+	cmdStr := strings.Join(args, " ")
+	shellInput := map[string]interface{}{
+		"command": cmdStr,
 	}
-
-	if err != nil {
-		result["error"] = err.Error()
-		if cmd.ProcessState != nil {
-			result["exit_code"] = cmd.ProcessState.ExitCode()
-		} else {
-			result["exit_code"] = -1
-		}
-	} else {
-		result["exit_code"] = 0
+	if v, ok := withMap["stdout"]; ok {
+		shellInput["stdout"] = v
 	}
-
-	if outputPath, ok := withMap["output"].(string); ok && outputPath != "" {
-		result["output_file"] = outputPath
+	if v, ok := withMap["stderr"]; ok {
+		shellInput["stderr"] = v
 	}
-
-	return result, nil
+	return registry.Call(ctx, "builtin/shell", shellInput)
 }
 
 func buildSemgrepArgs(m map[string]interface{}) []string {

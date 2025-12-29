@@ -37,6 +37,14 @@ func Get(name string) (StepFunc, bool) {
 	return fn, ok
 }
 
+func Call(ctx context.Context, name string, with interface{}) (interface{}, error) {
+	fn, ok := Get(name)
+	if !ok {
+		return nil, fmt.Errorf("unknown step function: %s", name)
+	}
+	return fn(ctx, with)
+}
+
 // List returns all registered step names
 func List() []string {
 	mu.RLock()

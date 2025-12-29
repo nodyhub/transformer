@@ -32,6 +32,18 @@ func Convert(ctx context.Context, with interface{}) (interface{}, error) {
 		return nil, err
 	}
 
+	// If input is a shell wrapper result, extract 'output' and parse as JSON if possible
+	if inputMap, ok := input.(map[string]interface{}); ok {
+		if out, ok := inputMap["output"].(string); ok && out != "" {
+			var parsed interface{}
+			if err := json.Unmarshal([]byte(out), &parsed); err == nil {
+				input = parsed
+			} else {
+				input = out
+			}
+		}
+	}
+
 	// Check if input is already SARIF 2.1.0
 	if sarifData, isSARIF := checkIfAlreadySARIF(input); isSARIF {
 		return sarifData, nil
