@@ -55,7 +55,7 @@ runs:
           -v "${{ github.workspace }}:/workspace" \
           -w "/workspace/${{ inputs.working-directory }}" \
           ghcr.io/nodyhub/transformer:${{ inputs.transformer-version }} \
-          transformer run "${{ inputs.scan-file }}"
+          transformer run -v "${{ inputs.scan-file }}"
         
         echo "report=${{ inputs.output-file }}" >> $GITHUB_OUTPUT
 
