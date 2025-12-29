@@ -81,8 +81,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&logFile, "log-file", "", "Set the log file path (default is stderr; use 'stdout' for standard output)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging (equivalent to --log-level=debug)")
 
-	rootCmd.AddCommand(versionCmd)
-
 	// If verbose is set, override log level to debug
 	cobra.OnInitialize(func() {
 		if verbose {

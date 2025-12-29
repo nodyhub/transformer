@@ -12,7 +12,7 @@ LDFLAGS = -ldflags "-X 'github.com/nodyhub/transformer/cmd.Version=$(VERSION)' -
 
 # Build the binary
 build:
-	go build $(LDFLAGS) -o bin/transformer ./cmd
+	go build $(LDFLAGS) -o bin/transformer ./cmd/transformer && chmod +x bin/transformer
 
 # Build binaries for multiple architectures
 release:
