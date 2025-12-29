@@ -88,7 +88,7 @@ func Shell(ctx context.Context, with interface{}) (interface{}, error) {
 		result["error"] = err.Error()
 	}
 
-	return result, err
+	return result, nil
 }
 
 func setupWriters(cmd *exec.Cmd, stdoutSet bool, stdoutPath string, stderrSet bool, stderrPath string, outputBuffer *bytes.Buffer) (writerWrapper, writerWrapper, error) {
