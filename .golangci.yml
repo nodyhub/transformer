@@ -1,0 +1,69 @@
+version: 2
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  # Disable all by default, then enable specific ones
+  disable-all: true
+  enable:
+    - errcheck      # Checks for unchecked errors (essential)
+    - govet         # Reports suspicious constructs (shadowing, printf, etc.)
+    - ineffassign   # Detects unused assignments
+    - staticcheck   # Applies a huge set of static analysis checks (includes gosimple)
+    - unused        # Checks for unused constants, variables, functions and types
+    - revive        # Replacement for the deprecated golint (style & naming)
+    - misspell      # Finds commonly misspelled English words in comments
+    - bodyclose     # Checks whether HTTP response body is closed (prevents leaks)
+    - unparam       # Reports unused function parameters
+    - gocyclo       # Computes and checks the cyclomatic complexity of functions
+    - gosec         # Inspects source code for security problems
+    - gocritic      # Provides diagnostics that check for bugs, performance and style issues
+    - errorlint     # Ensures proper error wrapping with %w
+    - nilerr        # Catches nil error returns with nil value
+    - nilnil        # Prevents returning (nil, nil)
+    - unconvert     # Removes unnecessary type conversions
+    - predeclared   # Finds shadowing of predeclared identifiers
+
+  settings:
+    govet:
+      enable:
+        - shadow
+    revive:
+      # See https://github.com/mgechev/revive#available-rules for more options
+      rules:
+        - name: exported
+          severity: warning
+    gocyclo:
+      min-complexity: 35 # Flags functions that are getting too "messy"
+    errcheck:
+      # Exclude certain functions from errcheck
+      exclude-functions:
+        - io.Closer.Close
+        - os.File.Close
+        - os.Remove
+      # Alternatively, ignore specific patterns
+      ignore: os:.*,io:.*
+
+  exclusions:
+    # Log a warning if an exclusion rule is unused.
+    # Default: false
+    warn-unused: true
+    # Predefined exclusion rules.
+    # Default: []
+    presets:
+      - comments
+      - std-error-handling
+      - common-false-positives
+      - legacy
+    # Excluding configuration per-path, per-linter, per-text and per-source.
+    rules:
+      # Exclude some linters from running on tests files.
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - staticcheck
+          - errcheck
+          - dupl
+          - gosec

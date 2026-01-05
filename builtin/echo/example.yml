@@ -1,0 +1,60 @@
+# Echo Builtin Examples
+
+# Example 1: Basic message
+- id: hello
+  name: Simple message
+  uses: builtin/echo
+  with:
+    message: "Hello World"
+
+# Example 2: Output capture and reuse
+- id: greeting
+  uses: builtin/echo
+  with:
+    message: "Hello, Transformer!"
+
+- name: Reference previous output
+  uses: builtin/echo
+  with:
+    message: "We said: ${{ outputs.greeting.output }}"
+
+# Example 3: Using CLI arguments
+- id: echo_first_arg
+  uses: builtin/echo
+  with:
+    message: "First argument is ${{ args.0 }}"
+
+# Example 4: Using environment variables
+- id: show_env
+  uses: builtin/echo
+  with:
+    message: "User ${{ env.USER }} home is ${{ env.HOME }}"
+
+# Example 5: Chained operations with shell
+- id: get_date
+  uses: builtin/shell
+  with:
+    command: date
+
+- name: Echo date result
+  uses: builtin/echo
+  with:
+    message: "Current date: ${{ outputs.get_date.output }}"
+
+# Example 6: Multiline message
+- name: Show system info
+  uses: builtin/echo
+  with:
+    message: |
+      System Information:
+      Hostname: $(hostname)
+      User: ${{ env.USER }}
+
+# Example 7: List of strings
+- name: Print lines
+  uses: builtin/echo
+  with:
+    message:
+      - "Line 1"
+      - "Line 2"
+      - "Line 3"

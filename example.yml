@@ -1,0 +1,43 @@
+# Example transformer workflow
+# Run with: transformer run example.yml
+
+# Example 1: Basic echo
+- id: greeting
+  name: Print a greeting
+  uses: builtin/echo
+  with:
+    message: "Hello, Transformer!"
+
+# Example 2: Shell command
+- id: date_cmd
+  name: Get current date
+  uses: builtin/shell
+  with:
+    command: date
+
+# Example 3: Reference previous output
+- name: Echo the date
+  uses: builtin/echo
+  with:
+    message: "Today is: ${{ outputs.date_cmd.output }}"
+
+# Example 4: Write to file
+- id: write_log
+  name: Write log file
+  uses: builtin/file/write
+  with:
+    path: "log.txt"
+    content: "Greeting: ${{ outputs.greeting.output }}\nDate: ${{ outputs.date_cmd.output }}"
+
+# Example 5: Read file
+- id: read_log
+  name: Read log file
+  uses: builtin/file/read
+  with:
+    path: ${{ outputs.write_log.path }}
+
+# Example 6: Display file contents
+- name: Show log contents
+  uses: builtin/echo
+  with:
+    message: "Log file contains:\n${{ outputs.read_log.content }}"

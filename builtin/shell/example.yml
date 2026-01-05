@@ -1,0 +1,95 @@
+# Shell Builtin Examples
+
+# Example 1: Basic command with output capture
+- id: get_date
+  name: Get current date
+  uses: builtin/shell
+  with:
+    command: date
+
+- name: Display date
+  uses: builtin/echo
+  with:
+    message: Current date is ${{ outputs.get_date.output }}
+
+# Example 2: Multiple commands
+- id: system_info
+  name: Get system info
+  uses: builtin/shell
+  with:
+    command: |
+      echo "Hostname: $(hostname)"
+      echo "PWD: $(pwd)"
+
+- name: Show system info
+  uses: builtin/echo
+  with:
+    message: ${{ outputs.system_info.output }}
+
+# Example 3: Using CLI arguments
+- id: echo_arg
+  uses: builtin/shell
+  with:
+    command: echo "First argument is ${{ args.0 }}"
+
+# Example 4: Using environment variables
+- id: show_env
+  uses: builtin/shell
+  with:
+    command: echo "User=${{ env.USER }} Home=${{ env.HOME }}"
+
+# Example 5: Output to terminal
+- name: Visible output
+  uses: builtin/shell
+  with:
+    command: echo "This appears in terminal"
+    stdout: stdout
+
+# Example 6: Suppress output
+- name: Silent execution
+  uses: builtin/shell
+  with:
+    command: echo "This is suppressed"
+    stdout: discard
+
+# Example 7: Redirect stderr
+- name: Capture and show errors
+  uses: builtin/shell
+  with:
+    command: echo "Error message" >&2
+    stderr: stdout
+
+# Example 8: Chained operations
+- id: generate_data
+  uses: builtin/shell
+  with:
+    command: echo "generated data at $(date)"
+
+- id: process_data
+  uses: builtin/shell
+  with:
+    command: echo "Processing: ${{ outputs.generate_data.output }}"
+    stdout: /tmp/transformer_output.log
+
+- name: Separate logs
+  uses: builtin/shell
+  with:
+    command: |
+      echo "Normal output"
+      echo "Error output" >&2
+    stdout: /tmp/stdout.log
+    stderr: /tmp/stderr.log
+
+# Complex example combining everything
+- id: complex
+  name: Complex command with substitutions
+  uses: builtin/shell
+  with:
+    command: |
+      echo "=== System Info ==="
+      echo "Hostname: ${{ outputs.hostname }}"
+      echo "Date: ${{ outputs.get_date }}"
+      echo "User: ${{ env.USER }}"
+      echo "Arg: ${{ args.0 }}"
+      echo "==================="
+    stdout: stdout

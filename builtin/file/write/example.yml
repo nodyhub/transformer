@@ -1,0 +1,83 @@
+# File Write Builtin Examples
+
+# Example 1: Basic write
+- id: write_config
+  name: Write config file
+  uses: builtin/file/write
+  with:
+    path: "test_config.json"
+    content: |
+      {
+        "name": "test-app",
+        "version": "1.0.0"
+      }
+
+- name: Confirm write
+  uses: builtin/echo
+  with:
+    message: Config written - ${{ outputs.write_config.bytes }} bytes
+
+# Example 2: Write and read workflow
+- id: write_data
+  name: Write data file
+  uses: builtin/file/write
+  with:
+    path: "test_data.txt"
+    content: |
+      This is sample data
+      for the write example
+      with multiple lines
+
+- id: read_back
+  name: Read written file
+  uses: builtin/file/read
+  with:
+    path: ${{ outputs.write_data.path }}
+
+- name: Display read content
+  uses: builtin/echo
+  with:
+    message: Successfully wrote and read ${{ outputs.read_back.bytes }} bytes
+
+# Example 3: Append mode
+- id: create_log
+  name: Create log file
+  uses: builtin/file/write
+  with:
+    path: "test_log.txt"
+    content: "Log started\n"
+
+- id: append_log_entry
+  name: Append to log
+  uses: builtin/file/write
+  with:
+    path: ${{ outputs.create_log.path }}
+    content: "New log entry\n"
+    mode: "append"
+
+- id: verify_log
+  name: Verify log file
+  uses: builtin/file/read
+  with:
+    path: ${{ outputs.create_log.path }}
+
+- name: Show appended content
+  uses: builtin/echo
+  with:
+    message: |
+      Log file content:
+      ${{ outputs.verify_log.content }}
+
+# Example 4: Write with permissions
+- id: write_script
+  name: Write executable script
+  uses: builtin/file/write
+  with:
+    path: "test_script.sh"
+    content: "#!/bin/bash\necho 'Hello from script'\n"
+    perm: 0755
+
+- name: Confirm script written
+  uses: builtin/echo
+  with:
+    message: Script written with permissions - ${{ outputs.write_script.bytes }} bytes

@@ -1,0 +1,69 @@
+# File Read Builtin Examples
+
+# Setup: Create test files
+- id: create_config
+  name: Create config file
+  uses: builtin/file/write
+  with:
+    path: "test_config.json"
+    content: |
+      {
+        "name": "test-app",
+        "version": "1.0.0"
+      }
+
+- id: create_data
+  name: Create data file
+  uses: builtin/file/write
+  with:
+    path: "test_data.txt"
+    content: |
+      This is sample data
+      for the read example
+      with multiple lines
+
+# Example 1: Basic read
+- id: read_config
+  name: Read config file
+  uses: builtin/file/read
+  with:
+    path: ${{ outputs.create_config.path }}
+
+- name: Display config info
+  uses: builtin/echo
+  with:
+    message: Config file loaded - ${{ outputs.read_config.bytes }} bytes
+
+# Example 2: Read and process
+- id: read_data
+  name: Read data file
+  uses: builtin/file/read
+  with:
+    path: ${{ outputs.create_data.path }}
+
+- name: Display data
+  uses: builtin/echo
+  with:
+    message: |
+      Data read from ${{ outputs.read_data.path }}
+      Content:
+      ${{ outputs.read_data.content }}
+
+# Example 3: Write and read workflow
+- id: create_report
+  name: Create report
+  uses: builtin/file/write
+  with:
+    path: "test_report.txt"
+    content: "Security scan completed at $(date)"
+
+- id: read_report
+  name: Read report
+  uses: builtin/file/read
+  with:
+    path: ${{ outputs.create_report.path }}
+
+- name: Verify report
+  uses: builtin/echo
+  with:
+    message: Report verification - Read ${{ outputs.read_report.bytes }} bytes from ${{ outputs.read_report.path }}
