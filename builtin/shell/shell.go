@@ -3,6 +3,7 @@ package shell
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -84,6 +85,16 @@ func Shell(ctx context.Context, with interface{}) (interface{}, error) {
 
 	if cmd.ProcessState != nil {
 		result["exit_code"] = cmd.ProcessState.ExitCode()
+	}
+
+	// Handle errors from command execution
+	// ExitError is expected for non-zero exit codes and is handled above via exit_code
+	if err != nil {
+		var exitErr *exec.ExitError
+		if !errors.As(err, &exitErr) {
+			// Actual execution error (command not found, permission denied, etc.)
+			return nil, fmt.Errorf("failed to execute command: %w", err)
+		}
 	}
 
 	return result, nil
