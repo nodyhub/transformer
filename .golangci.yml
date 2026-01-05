@@ -1,12 +1,10 @@
-version: 2
+version: "2"
 
 run:
   timeout: 5m
   modules-download-mode: readonly
 
 linters:
-  # Disable all by default, then enable specific ones
-  disable-all: true
   enable:
     - errcheck      # Checks for unchecked errors (essential)
     - govet         # Reports suspicious constructs (shadowing, printf, etc.)
@@ -43,8 +41,6 @@ linters:
         - io.Closer.Close
         - os.File.Close
         - os.Remove
-      # Alternatively, ignore specific patterns
-      ignore: os:.*,io:.*
 
   exclusions:
     # Log a warning if an exclusion rule is unused.
