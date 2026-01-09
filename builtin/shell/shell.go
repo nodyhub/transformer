@@ -111,11 +111,11 @@ func moduleHook(ctx context.Context) error {
 		return fmt.Errorf("failed to create temporary directory for module hook: %w", err)
 	}
 
-	// defer func() {
-	// 	if err := os.RemoveAll(tempDir); err != nil {
-	// 		slog.Error("failed to remove temporary directory for module hook", "error", err)
-	// 	}
-	// }()
+	defer func() {
+		if err := os.RemoveAll(tempDir); err != nil {
+			slog.Error("failed to remove temporary directory for module hook", "error", err)
+		}
+	}()
 
 	// copy all files from moduleHook embedded files to tempDir
 	files, err := moduleHookFS.ReadDir("module-hook")
@@ -130,7 +130,7 @@ func moduleHook(ctx context.Context) error {
 		}
 
 		destPath := fmt.Sprintf("%s/%s", tempDir, file.Name())
-		if err := os.WriteFile(destPath, data, 0755); err != nil {
+		if err := os.WriteFile(destPath, data, 0644); err != nil {
 			return fmt.Errorf("failed to write module hook file %s: %w", destPath, err)
 		}
 	}
