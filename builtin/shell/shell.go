@@ -112,7 +112,8 @@ func moduleHook(ctx context.Context) error {
 	}
 
 	defer func() {
-		if err := os.RemoveAll(tempDir); err != nil {
+		err = os.RemoveAll(tempDir)
+		if err != nil {
 			slog.Error("failed to remove temporary directory for module hook", "error", err)
 		}
 	}()
@@ -130,7 +131,8 @@ func moduleHook(ctx context.Context) error {
 		}
 
 		destPath := fmt.Sprintf("%s/%s", tempDir, file.Name())
-		if err := os.WriteFile(destPath, data, 0644); err != nil {
+		err = os.WriteFile(destPath, data, 0600)
+		if err != nil {
 			return fmt.Errorf("failed to write module hook file %s: %w", destPath, err)
 		}
 	}
