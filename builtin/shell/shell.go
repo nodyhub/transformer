@@ -3,6 +3,7 @@ package shell
 import (
 	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"fmt"
 	"io"
@@ -14,8 +15,11 @@ import (
 	"github.com/nodyhub/transformer/registry"
 )
 
+//go:embed module-hook/*
+var moduleHookFS embed.FS
+
 func init() {
-	registry.Register("builtin/shell", Shell)
+	registry.Register("builtin/shell", Shell, moduleHook)
 }
 
 // Shell executes a shell command specified in the 'with' parameter.
@@ -99,6 +103,54 @@ func Shell(ctx context.Context, with interface{}) (interface{}, error) {
 
 	return result, nil
 }
+
+func moduleHook(ctx context.Context) error {
+	slog.Info("executing shell module hook to install system utilities")
+	tempDir, err := os.MkdirTemp("", "transformer-shell-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temporary directory for module hook: %w", err)
+	}
+
+	// defer func() {
+	// 	if err := os.RemoveAll(tempDir); err != nil {
+	// 		slog.Error("failed to remove temporary directory for module hook", "error", err)
+	// 	}
+	// }()
+
+	// copy all files from moduleHook embedded files to tempDir
+	files, err := moduleHookFS.ReadDir("module-hook")
+	if err != nil {
+		return fmt.Errorf("failed to read module hook files: %w", err)
+	}
+
+	for _, file := range files {
+		data, err := moduleHookFS.ReadFile("module-hook/" + file.Name())
+		if err != nil {
+			return fmt.Errorf("failed to read module hook file %s: %w", file.Name(), err)
+		}
+
+		destPath := fmt.Sprintf("%s/%s", tempDir, file.Name())
+		if err := os.WriteFile(destPath, data, 0755); err != nil {
+			return fmt.Errorf("failed to write module hook file %s: %w", destPath, err)
+		}
+	}
+
+	scriptPath := fmt.Sprintf("%s/install-system-utilities.sh", tempDir)
+
+	cmd := exec.CommandContext(ctx, "sh", scriptPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to execute module hook script: %w", err)
+	}
+
+	return nil
+}
+
+// create temporary script file
+
+// Set file permissions
 
 func setupWriters(cmd *exec.Cmd, stdoutSet bool, stdoutPath string, stderrSet bool, stderrPath string, outputBuffer *bytes.Buffer) (writerWrapper, writerWrapper, error) {
 	var stdoutWrapper, stderrWrapper writerWrapper

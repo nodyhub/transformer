@@ -31,6 +31,28 @@ See [example.yml](example.yml) for a complete example.
 - `builtin/file/read` - Read file contents
 - `builtin/file/write` - Write content to files
 
+## Module Hooks
+
+Transformer supports module hooks to install system-level dependencies and modules required for your workflows. Module hooks are one-time setup commands that install system utilities and libraries before your workflow runs.
+
+### Managing Modules
+
+List available modules:
+```bash
+transformer modules list
+```
+
+Install a module or modules:
+```bash
+transformer modules install <module>
+transformer modules install <module1>,<module2>
+transformer modules install all
+```
+
+### Built-in Module Hooks
+
+The `builtin/shell` module registers hooks that install common system dependencies like curl, wget, git, jq, and other utilities required for shell scripts and system integrations.
+
 ## Step Structure
 
 ```yaml

@@ -38,9 +38,15 @@ lint:
 	golangci-lint run
 
 # Build Docker image
+# Usage:
+#   make image                                    # builds with MODULES=all, tag=latest
+#   make image MODULES="git,ssh" TAG="v1.0"      # builds with custom MODULES and TAG
+image: MODULES ?= all
+image: TAG ?= latest
 image:
-	docker build  --build-arg MODULES="all" -t transformer:latest .
-	docker tag transformer:latest ghcr.io/nodyhub/transformer:latest
+	docker build --build-arg MODULES="$(MODULES)" -t transformer:$(TAG) .
+	docker tag transformer:$(TAG) ghcr.io/nodyhub/transformer:$(TAG)
+
 
 
 # Clean build artifacts
