@@ -33,7 +33,6 @@ build/
 Thumbs.db
 
 # Git
-.git/
 .gitignore
 
 # Documentation

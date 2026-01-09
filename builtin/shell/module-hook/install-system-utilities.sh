@@ -1,7 +1,8 @@
 #!/bin/bash
-set -euo pipefail
 
-echo "Installing system libraries..."
+set -eu pipefail
+
+echo "Installing system libraries for shell scripts..."
 apt-get update
 apt-get install -y --no-install-recommends \
 	ca-certificates \
@@ -14,3 +15,8 @@ apt-get install -y --no-install-recommends \
 	gnupg \
 	gnupg2 \
 	gpg
+
+# clean up apt cache
+rm -rf /var/lib/apt/lists/*
+
+# exit 1
